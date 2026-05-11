@@ -6,6 +6,12 @@ import { Agreement, AgreementProps } from '../../../domain/entities/Agreement';
 import { Money } from '../../../domain/value-objects';
 import { db } from '../../database/connection';
 import { agreements, AgreementDb } from '../schema';
+import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+
+
+type AgreementInsert = InferInsertModel<typeof agreements>;
+type AgreementSelect = InferSelectModel<typeof agreements>;
+
 
 @injectable()
 export class DrizzleAgreementRepository implements IAgreementRepository {
@@ -57,12 +63,12 @@ export class DrizzleAgreementRepository implements IAgreementRepository {
     return new Agreement(props);
   }
 
-  private mapToDb(agreement: Agreement): Record<string, unknown> {
+  private mapToDb(agreement: Agreement): AgreementInsert {
     return {
       id: agreement.id,
       name: agreement.name,
       category: agreement.category,
-      monthlyFee: agreement.monthlyFee?.amount.toFixed(2),
+      monthlyFee: agreement.monthlyFee !== undefined ? agreement.monthlyFee.toString() : null,
       isActive: agreement.isActive,
       createdAt: agreement.createdAt,
       updatedAt: agreement.updatedAt

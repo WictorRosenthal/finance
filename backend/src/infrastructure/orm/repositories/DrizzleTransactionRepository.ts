@@ -6,6 +6,10 @@ import { Transaction, TransactionProps } from '../../../domain/entities/Transact
 import { Money, TransactionType } from '../../../domain/value-objects';
 import { db } from '../../database/connection';
 import { transactions, TransactionDb } from '../schema';
+import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+
+type TransactionInsert = InferInsertModel<typeof transactions>;
+type TransactionSelect = InferSelectModel<typeof transactions>;
 
 @injectable()
 export class DrizzleTransactionRepository implements ITransactionRepository {
@@ -134,7 +138,7 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
     return new Transaction(props);
   }
 
-  private mapToDb(transaction: Transaction): Record<string, unknown> {
+  private mapToDb(transaction: Transaction): TransactionInsert {
     return {
       id: transaction.id,
       description: transaction.description,
@@ -142,10 +146,10 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
       type: transaction.type,
       category: transaction.category,
       accountId: transaction.accountId,
-      agreementId: transaction.agreementId,
+      agreementId: transaction.agreementId ?? null,
       date: transaction.date,
-      createdAt: transaction.createdAt,
-      updatedAt: transaction.updatedAt
+      createdAt: transaction.createdAt ?? new Date(),
+      updatedAt: transaction.updatedAt ?? new Date()
     };
   }
 }

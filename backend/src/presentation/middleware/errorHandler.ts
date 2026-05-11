@@ -4,6 +4,7 @@ import { AppError } from '../../shared/errors/AppError';
 
 export function errorHandler(error: Error, request: FastifyRequest, reply: FastifyReply) {
   console.error('Error:', error);
+   const err = error as any;
 
   if (error instanceof AppError) {
     return reply.status(error.statusCode).send({
@@ -14,11 +15,11 @@ export function errorHandler(error: Error, request: FastifyRequest, reply: Fasti
   }
 
   // Erros de validação do Fastify/Zod
-  if (error.validation) {
+  if (err.validation) {
     return reply.status(400).send({
       error: 'ValidationError',
       message: 'Invalid request data',
-      details: error.validation
+      details: err.validation
     });
   }
 
