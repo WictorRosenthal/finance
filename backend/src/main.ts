@@ -4,21 +4,17 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { registerRoutes } from './presentation/routes/api.routes';
 import { errorHandler } from './presentation/middleware/errorHandler';
-import express from 'express';
-import userRoutes from './presentation/routes/userRoutes';
+import { userRoutes } from './presentation/routes/user.routes';
 
-const app = express();
-app.use(express.json());
-app.use(userRoutes);
-
-const PORT = parseInt(process.env.PORT || '3001');
-const HOST = process.env.HOST || '0.0.0.0';
+const PORT = parseInt(process.env.port || '3001');
+const HOST = process.env.host || '0.0.0.0';
 
 async function bootstrap() {
   const app = Fastify({
     logger: true
   });
-
+  // Register user routes
+  await app.register(userRoutes, { prefix: '/api' });
   // Register CORS
   await app.register(cors, {
     origin: true,
