@@ -2,3 +2,4 @@
 export * from './TransactionDTO';
 export * from './AccountDTO';
 export * from './AgreementDTO';
+export * from './LoginDTO';

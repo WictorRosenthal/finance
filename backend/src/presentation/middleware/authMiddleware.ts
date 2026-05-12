@@ -1,16 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { JwtService } from '../../infrastructure/auth/JwtService';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'changeme';
-
-export function authenticateJWT(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.sendStatus(401);
+export async function authenticateJWT(request: FastifyRequest, reply: FastifyReply) {
+  const authHeader = request.headers.authorization;
+  if (!authHeader) return reply.status(401).send({ error: 'No token' });
   const token = authHeader.split(' ')[1];
   try {
-    req.user = jwt.verify(token, JWT_SECRET);
-    next();
+    const jwtService = new JwtService();
+    request.user = jwtService.verifyToken(token);
   } catch {
-    res.sendStatus(403);
+    return reply.status(403).send({ error: 'Invalid token' });
   }
 }

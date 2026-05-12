@@ -31,6 +31,14 @@ import { GetAgreementByIdUseCase } from '../../application/use-cases/agreements/
 import { UpdateAgreementUseCase } from '../../application/use-cases/agreements/UpdateAgreementUseCase.js';
 import { DeleteAgreementUseCase } from '../../application/use-cases/agreements/DeleteAgreementUseCase.js';
 
+// Oauth - Users
+import { IUserRepository } from '../../domain/repositories/IUserRepository';
+import { DrizzleUserRepository } from '../orm/repositories/DrizzleUserRepository';
+import { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase';
+import { OAuthCallbackUseCase } from '../../application/use-cases/auth/OAuthCallbackUseCase';
+import { JwtService } from '../auth/JwtService';
+import { OAuthService } from '../auth/OAuthService';
+
 // ---------------------
 // Repositories
 // ---------------------
@@ -44,6 +52,10 @@ container.register<IAccountRepository>('IAccountRepository', {
 
 container.register<IAgreementRepository>('IAgreementRepository', {
   useClass: DrizzleAgreementRepository,
+});
+
+container.register<IUserRepository>('IUserRepository', {
+  useClass: DrizzleUserRepository
 });
 
 // ---------------------
@@ -66,5 +78,30 @@ container.registerSingleton(GetAgreementsUseCase);
 container.registerSingleton(GetAgreementByIdUseCase);
 container.registerSingleton(UpdateAgreementUseCase);
 container.registerSingleton(DeleteAgreementUseCase);
+
+container.register<LoginUseCase>('LoginUseCase', {
+  useFactory: (c) => new LoginUseCase(
+    c.resolve('IUserRepository'),
+    c.resolve('JwtService')
+  )
+});
+container.register<OAuthCallbackUseCase>('OAuthCallbackUseCase', {
+  useFactory: (c) => new OAuthCallbackUseCase(
+    c.resolve('IUserRepository'),
+    c.resolve('JwtService'),
+    c.resolve('OAuthService')
+  )
+});
+
+// ---------------------
+//services
+// ---------------------
+
+container.register<JwtService>('JwtService', {
+  useClass: JwtService
+});
+container.register<OAuthService>('OAuthService', {
+  useClass: OAuthService
+});
 
 export { container };

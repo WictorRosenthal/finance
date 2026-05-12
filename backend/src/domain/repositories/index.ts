@@ -2,4 +2,4 @@
 export { type ITransactionRepository, type TransactionFilters } from './ITransactionRepository';
 export { type IAccountRepository } from './IAccountRepository';
 export { type IAgreementRepository } from './IAgreementRepository';
-export { type IDrizzleUserRepository } from './IDrizzleUserRepository';
+export { type IUserRepository } from './IUserRepository';

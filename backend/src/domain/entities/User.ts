@@ -1,34 +1,50 @@
+export type UserRole = 'admin' | 'read-only';
 
 export interface UserProps {
   id: string;
-  username: string;
-  password: string;
-  role: 'admin' | 'read-only';
+  email: string;
+  passwordHash?: string;
+  name: string;
+  oauthProvider?: string;
+  oauthId?: string;
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export class User {
-  private readonly props: UserProps;
+  private props: UserProps;
 
   constructor(props: UserProps) {
     this.validate(props);
-    this.props = props;
+    this.props = { ...props };
   }
 
   get id(): string {
     return this.props.id;
   }
 
-  get username(): string {
-    return this.props.username;
+  get email(): string {
+    return this.props.email;
   }
 
-  get password(): string {
-    return this.props.password;
+  get passwordHash(): string | undefined {
+    return this.props.passwordHash;
   }
 
-  get role(): string {
+  get name(): string {
+    return this.props.name;
+  }
+
+  get oauthProvider(): string | undefined {
+    return this.props.oauthProvider;
+  }
+
+  get oauthId(): string | undefined {
+    return this.props.oauthId;
+  }
+
+  get role(): UserRole {
     return this.props.role;
   }
 
@@ -40,55 +56,55 @@ export class User {
     return this.props.updatedAt;
   }
 
-  updateUsername(username: string): void {
-    if (!username || username.trim() === '') {
-      throw new Error('Username cannot be empty');
+  updateName(name: string): void {
+    if (!name || name.trim() === '') {
+      throw new Error('Name cannot be empty');
     }
-
-    this.props.username = username.trim();
+    this.props.name = name.trim();
     this.touch();
   }
 
-  updatePassword(hashedPassword: string): void {
+  updatePasswordHash(hashedPassword: string): void {
     if (!hashedPassword) {
-      throw new Error('Password cannot be empty');
+      throw new Error('Password hash cannot be empty');
     }
-
-    this.props.password = hashedPassword;
+    this.props.passwordHash = hashedPassword;
     this.touch();
   }
 
-  updateRole(role: 'admin' | 'read-only'): void {
+  updateRole(role: UserRole): void {
     if (!role) {
       throw new Error('Invalid role');
     }
-
     this.props.role = role;
     this.touch();
   }
-
 
   private touch(): void {
     this.props.updatedAt = new Date();
   }
 
   private validate(props: UserProps): void {
-    if (!props.username || props.username.trim() === '') {
-      throw new Error('Username is required');
+    if (!props.email || props.email.trim() === '') {
+      throw new Error('Email is required');
     }
-
-    if (!props.password) {
-      throw new Error('Password is required');
+    if (!props.name || props.name.trim() === '') {
+      throw new Error('Name is required');
     }
-
     if (!props.role) {
       throw new Error('Role is required');
     }
+    if (!props.createdAt) {
+      throw new Error('createdAt is required');
+    }
+    if (!props.updatedAt) {
+      throw new Error('updatedAt is required');
+    }
   }
 
-  // Remove senha (importante para API)
-  toSafeObject(): Omit<UserProps, 'password'> {
-    const { password, ...safe } = this.props;
+  // Remove passwordHash (importante para API)
+  toSafeObject(): Omit<UserProps, 'passwordHash'> {
+    const { passwordHash, ...safe } = this.props;
     return safe;
   }
 

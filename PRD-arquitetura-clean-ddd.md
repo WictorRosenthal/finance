@@ -535,7 +535,7 @@ export class TransactionController {
 | **Testabilidade** | Cada camada pode ser testada isoladamente com mocks |
 | **Manutenibilidade** | Mudanças de banco/framework não afetam lógica de negócio |
 | **Escalabilidade** | Novas funcionalidades seguem padrão estabelecido |
-| ** Clareza** | Responsabilidades bem definidas em cada camada |
+| **Clareza** | Responsabilidades bem definidas em cada camada |
 | **DI** | Baixo acoplamento, fácil substituição de implementações |
 
 ---
