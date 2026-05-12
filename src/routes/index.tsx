@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -14,8 +14,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { ArrowDownRight, ArrowUpRight, Wallet, TrendingUp, Plus } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { ArrowDownRight, ArrowUpRight, Wallet, TrendingUp, Plus, LogOut } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,6 +69,25 @@ function mapApiTx(tx: TransactionApiDTO): Tx {
     next_payroll: false,
     created_at: tx.createdAt,
   };
+}
+
+function LogoutButton() {
+  const navigate = useNavigate();
+  function handleLogout() {
+    localStorage.removeItem("token");
+    navigate({ to: "/login" });
+  }
+  return (
+    <Button
+      variant="outline"
+      className="flex items-center gap-2"
+      onClick={handleLogout}
+      title="Sair"
+    >
+      <LogOut className="h-4 w-4" />
+      Sair
+    </Button>
+  );
 }
 
 function DashboardPage() {
@@ -141,11 +159,17 @@ function DashboardPage() {
         className="space-y-8"
       >
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Visão geral</p>
-            <h1 className="font-display text-4xl md:text-5xl font-bold mt-1 capitalize">
-              {monthLabel}
-            </h1>
+          <div className="flex flex-col md:flex-row md:items-end gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Visão geral</p>
+              <h1 className="font-display text-4xl md:text-5xl font-bold mt-1 capitalize">
+                {monthLabel}
+              </h1>
+            </div>
+            {/* Botão de convênios e sair */}
+            <div className="flex gap-2 md:ml-6 mt-4 md:mt-0">
+              <LogoutButton />
+            </div>
           </div>
           <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full">
             <Link to="/transacoes/nova">

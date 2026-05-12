@@ -25,7 +25,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "", name: "" });
 
   const search = Route.useSearch() as { redirect?: string };
   const redirectTo = useMemo(() => search.redirect || "/", [search.redirect]);
@@ -92,9 +92,15 @@ function LoginPage() {
 
     try {
       const endpoint = mode === "login" ? "/api/login" : "/api/register";
+      // Para login, envie apenas email e password; para signup, envie também name
+      const payload =
+        mode === "login"
+          ? { email: form.email, password: form.password }
+          : { email: form.email, password: form.password, name: form.name };
+
       const data = await api<{ token?: string }>(endpoint, {
         method: "POST",
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       if (mode === "login") {
@@ -175,6 +181,22 @@ function LoginPage() {
                     required
                   />
                 </div>
+
+                {/* Campo nome só aparece no cadastro */}
+                {mode === "signup" && (
+                  <div className="space-y-1.5">
+                    <Label>Nome</Label>
+                    <Input
+                      type="text"
+                      autoComplete="name"
+                      value={form.name}
+                      onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                      placeholder="Seu nome"
+                      className="bg-background/50"
+                      required
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-1.5">
                   <Label>Senha</Label>

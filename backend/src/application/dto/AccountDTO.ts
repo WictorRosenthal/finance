@@ -16,8 +16,8 @@ export interface CreateAccountDTO {
   name: string;
   type: 'CHECKING' | 'SAVINGS' | 'CREDIT' | 'INVESTMENT';
   balance?: number;
-  color: string;
-  icon: string;
+  color?: string;
+  icon?: string;
 }
 
 export interface UpdateAccountDTO {

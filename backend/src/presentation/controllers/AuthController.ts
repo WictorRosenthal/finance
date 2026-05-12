@@ -16,10 +16,20 @@ export class AuthController {
     return reply.send({ token: jwt });
   }
 
-  async register(request: FastifyRequest, reply: FastifyReply) {
-    const { email, password, name } = request.body as any;
-    const useCase = container.resolve('RegisterUserUseCase') as { execute: (email: string, password: string, name: string) => Promise<void> };
-    await useCase.execute(email, password, name);
-    return reply.status(201).send({ message: 'User registered' });
-  }
+ async register(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    // Fastify pode não fazer o parse automático do body para JSON se não configurado
+    const { email, password, name } = request.body as { email?: string; password?: string; name?: string };
+
+    if (!email || !password || !name) {
+      return reply.status(400).send({ error: 'Campos obrigatórios ausentes.' });
+    }
+
+    const useCase = container.resolve('RegisterUserUseCase') as { execute: (params: { email: string; password: string; name: string }) => Promise<{ id: string; email: string; name: string }> };
+    const user = await useCase.execute({ email, password, name });
+    return reply.status(201).send({ id: user.id, email: user.email, name: user.name });
+    } catch (err: any) {
+      return reply.status(400).send({ error: err.message });
+    }
+}
 }

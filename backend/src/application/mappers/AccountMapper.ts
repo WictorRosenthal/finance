@@ -34,8 +34,8 @@ export class AccountMapper {
       name: dto.name,
       type: dto.type as AccountType,
       balance: dto.balance ?? 0,
-      color: dto.color,
-      icon: dto.icon
+      color: dto.color ?? '',
+      icon: dto.icon ?? ''
     };
   }
 }
