@@ -14,12 +14,16 @@ export class OAuthCallbackUseCase {
   async execute(provider: string, oauthToken: string): Promise<string> {
     const payload = await this.oauthService.verify(provider, oauthToken);
 
+    if (!payload) {
+      throw new Error('OAuth payload is undefined');
+    }
+
     let user = await this.userRepository.findByOAuth(provider, payload.sub);
 
     if (!user) {
       user = new User({
         id: randomUUID(),
-        email: payload.email,
+        email: payload.email || '',
         name: payload.name || '',
         oauthProvider: provider,
         oauthId: payload.sub,

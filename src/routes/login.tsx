@@ -2,13 +2,20 @@ import { api } from "@/lib/api";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, LockKeyhole, Mail, ShieldCheck, LogIn } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+// Google OAuth
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -18,7 +25,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ username: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
 
   const search = Route.useSearch() as { redirect?: string };
   const redirectTo = useMemo(() => search.redirect || "/", [search.redirect]);
@@ -30,6 +37,54 @@ function LoginPage() {
       void navigate({ to: redirectTo as never });
     }
   }, [navigate, redirectTo]);
+
+  // Google OAuth handler
+  async function handleGoogleLogin() {
+    setSubmitting(true);
+    try {
+      // Carrega o script do Google Identity Services se não estiver carregado
+      if (!window.google) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://accounts.google.com/gsi/client";
+          script.async = true;
+          script.onload = resolve;
+          script.onerror = reject;
+          document.body.appendChild(script);
+        });
+      }
+
+      // Cria um botão invisível do Google
+      const div = document.createElement("div");
+      document.body.appendChild(div);
+
+      return new Promise<void>((resolve, reject) => {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: async (response: any) => {
+            try {
+              // Envia o token do Google para o backend
+              const data = await api<{ token?: string }>("/api/oauth/callback", {
+                method: "POST",
+                body: JSON.stringify({ provider: "google", token: response.credential }),
+              });
+              localStorage.setItem("token", data.token ?? "");
+              toast.success("Login social realizado com sucesso");
+              void navigate({ to: redirectTo as never });
+              resolve();
+            } catch (err: any) {
+              toast.error(err?.message || "Erro ao autenticar com Google");
+              reject(err);
+            }
+          },
+        });
+        window.google.accounts.id.prompt();
+      });
+    } catch (err) {
+      toast.error("Erro ao carregar login social");
+    }
+    setSubmitting(false);
+  }
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
@@ -77,7 +132,7 @@ function LoginPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {[
               { icon: LockKeyhole, title: "JWT automático", text: "Sua sessão fica protegida sem exigir configuração manual." },
-              { icon: Mail, title: "Acesso por usuário", text: "Login tradicional com usuário e senha." },
+              { icon: Mail, title: "Acesso por usuário", text: "Login tradicional com email e senha." },
             ].map(({ icon: Icon, title, text }) => (
               <div key={title} className="rounded-2xl border border-border/50 bg-gradient-card p-5 shadow-card">
                 <Icon className="h-5 w-5 text-primary" />
@@ -109,13 +164,13 @@ function LoginPage() {
 
               <form onSubmit={handleAuth} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label>Usuário</Label>
+                  <Label>Email</Label>
                   <Input
-                    type="text"
+                    type="email"
                     autoComplete="username"
-                    value={form.username}
-                    onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
-                    placeholder="Seu usuário"
+                    value={form.email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                    placeholder="Seu email"
                     className="bg-background/50"
                     required
                   />
@@ -140,6 +195,23 @@ function LoginPage() {
                   <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
               </form>
+
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-muted-foreground">ou</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2"
+                onClick={handleGoogleLogin}
+                disabled={submitting}
+              >
+                <LogIn className="h-4 w-4" />
+                Entrar com Google
+              </Button>
 
               <p className="text-center text-xs text-muted-foreground">
                 Ao continuar, seus dados ficam protegidos por sessão individual.

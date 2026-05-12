@@ -1,16 +1,19 @@
-// filepath: backend/src/presentation/routes/api.routes.ts
 import { FastifyInstance } from 'fastify';
 import { TransactionController } from '../controllers/TransactionController';
 import { AccountController } from '../controllers/AccountController';
 import { AgreementController } from '../controllers/AgreementController';
-import { UserController } from '../controllers/UserController';
-
+import { authRoutes } from './authRoutes';
+import { AuthController } from '@presentation/controllers/AuthController';
 
 export async function registerRoutes(app: FastifyInstance) {
   const transactionController = new TransactionController();
   const accountController = new AccountController();
   const agreementController = new AgreementController();
-  const userController = new UserController();
+  const authController = new AuthController();
+
+  // Auth routes (JWT/OAuth)
+  await authRoutes(app);
+
   // Transactions
   app.post('/api/transactions', transactionController.create.bind(transactionController));
   app.get('/api/transactions', transactionController.getAll.bind(transactionController));
@@ -32,9 +35,10 @@ export async function registerRoutes(app: FastifyInstance) {
   app.put('/api/agreements/:id', agreementController.update.bind(agreementController));
   app.delete('/api/agreements/:id', agreementController.delete.bind(agreementController));
 
-  // Users
-  app.post('/api/register', userController.register.bind(userController));
-  app.post('/api/login', userController.login.bind(userController));
+  // Auth
+  app.post('/api/register', authController.register.bind(authController)); // <-- Cadastro de usuário
+  app.post('/api/login', authController.login.bind(authController));
+  app.post('/api/oauth/callback', authController.oauthCallback.bind(authController));
 
   // Health check
   app.get('/api/health', async () => {

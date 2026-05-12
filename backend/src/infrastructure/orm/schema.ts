@@ -38,10 +38,15 @@ export const agreements = pgTable('agreements', {
 });
 
 export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  username: text('username').notNull().unique(),
-  password: text('password').notNull(),
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash'), // nullable para OAuth
+  name: text('name').notNull(),
+  oauthProvider: text('oauth_provider'), // nullable
+  oauthId: text('oauth_id'), // nullable
   role: text('role').notNull(), // 'admin' | 'read-only'
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export type TransactionDb = typeof transactions.$inferSelect;

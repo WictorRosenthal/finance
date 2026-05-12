@@ -38,6 +38,7 @@ import { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase';
 import { OAuthCallbackUseCase } from '../../application/use-cases/auth/OAuthCallbackUseCase';
 import { JwtService } from '../auth/JwtService';
 import { OAuthService } from '../auth/OAuthService';
+import { RegisterUserUseCase } from '../../application/use-cases/auth/RegisterUserUseCase';
 
 // ---------------------
 // Repositories
@@ -79,6 +80,12 @@ container.registerSingleton(GetAgreementByIdUseCase);
 container.registerSingleton(UpdateAgreementUseCase);
 container.registerSingleton(DeleteAgreementUseCase);
 
+
+container.register<RegisterUserUseCase>('RegisterUserUseCase', {
+  useFactory: (c) => new RegisterUserUseCase(
+    c.resolve('IUserRepository')
+  )
+});
 container.register<LoginUseCase>('LoginUseCase', {
   useFactory: (c) => new LoginUseCase(
     c.resolve('IUserRepository'),

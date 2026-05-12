@@ -1,6 +1,12 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { JwtService } from '../../infrastructure/auth/JwtService';
 
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: any;
+  }
+}
+
 export async function authenticateJWT(request: FastifyRequest, reply: FastifyReply) {
   const authHeader = request.headers.authorization;
   if (!authHeader) return reply.status(401).send({ error: 'No token' });
