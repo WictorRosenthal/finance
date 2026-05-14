@@ -18,17 +18,26 @@ export class CreateAgreementUseCase {
     const props = AgreementMapper.toCreateProps(dto);
 
     const now = new Date();
+
     const agreementProps: AgreementProps = {
       id: uuidv4(),
       name: props.name,
       category: props.category,
-      monthlyFee: props.monthlyFee ? new Money(props.monthlyFee) : undefined,
+      monthlyFee: props.monthlyFee
+        ? new Money(props.monthlyFee)
+        : undefined,
       isActive: true,
       createdAt: now,
       updatedAt: now
     };
 
     const agreement = new Agreement(agreementProps);
+
+    // ✅ aplica desconto usando regra da entidade
+    if (dto.discountPercentage !== undefined) {
+      agreement.applyDiscount(dto.discountPercentage);
+    }
+
     const savedAgreement = await this.agreementRepository.save(agreement);
 
     return AgreementMapper.toDTO(savedAgreement);

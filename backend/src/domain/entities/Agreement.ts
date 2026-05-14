@@ -1,4 +1,3 @@
-// filepath: backend/src/domain/entities/Agreement.ts
 import { Money } from '../value-objects';
 
 export interface AgreementProps {
@@ -30,8 +29,14 @@ export class Agreement {
     return this.props.category;
   }
 
+  // ✅ Opção 1 (melhor): expor o Value Object
   get monthlyFee(): Money | undefined {
     return this.props.monthlyFee;
+  }
+
+  // ✅ Opção 2 (se precisar número simples)
+  get monthlyFeeAmount(): number | undefined {
+    return this.props.monthlyFee?.amount;
   }
 
   get isActive(): boolean {
@@ -50,22 +55,35 @@ export class Agreement {
     if (!name || name.trim() === '') {
       throw new Error('Name cannot be empty');
     }
+
     this.props.name = name.trim();
-    this.props.updatedAt = new Date();
+    this.touch();
   }
 
   updateMonthlyFee(fee: Money | undefined): void {
     this.props.monthlyFee = fee;
-    this.props.updatedAt = new Date();
+    this.touch();
+  }
+
+  // ✅ NOVO: regra de negócio dentro da entidade
+  applyDiscount(percent: number): void {
+    if (!this.props.monthlyFee) return;
+
+    this.props.monthlyFee = this.props.monthlyFee.applyDiscount(percent);
+    this.touch();
   }
 
   deactivate(): void {
     this.props.isActive = false;
-    this.props.updatedAt = new Date();
+    this.touch();
   }
 
   activate(): void {
     this.props.isActive = true;
+    this.touch();
+  }
+
+  private touch(): void {
     this.props.updatedAt = new Date();
   }
 

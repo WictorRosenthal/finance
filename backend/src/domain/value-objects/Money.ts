@@ -33,6 +33,18 @@ export class Money {
     return new Money(this._amount * factor, this._currency);
   }
 
+  // ✅ NOVO MÉTODO
+  applyDiscount(percent: number): Money {
+    if (percent < 0 || percent > 100) {
+      throw new Error('Discount percentage must be between 0 and 100');
+    }
+
+    const discountAmount = this._amount * (percent / 100);
+    const finalAmount = this._amount - discountAmount;
+
+    return new Money(finalAmount, this._currency);
+  }
+
   isPositive(): boolean {
     return this._amount > 0;
   }

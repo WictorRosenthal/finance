@@ -55,7 +55,7 @@ export class DrizzleAgreementRepository implements IAgreementRepository {
       id: dbRecord.id,
       name: dbRecord.name,
       category: dbRecord.category,
-      monthlyFee: dbRecord.monthlyFee ? new Money(parseFloat(dbRecord.monthlyFee), 'BRL') : undefined,
+      monthlyFee: dbRecord.monthlyFee != null? new Money(Number(dbRecord.monthlyFee), 'BRL') : undefined,
       isActive: dbRecord.isActive,
       createdAt: new Date(dbRecord.createdAt),
       updatedAt: new Date(dbRecord.updatedAt)
@@ -63,12 +63,15 @@ export class DrizzleAgreementRepository implements IAgreementRepository {
     return new Agreement(props);
   }
 
+  
   private mapToDb(agreement: Agreement): AgreementInsert {
     return {
       id: agreement.id,
       name: agreement.name,
       category: agreement.category,
-      monthlyFee: agreement.monthlyFee !== undefined ? agreement.monthlyFee.toString() : null,
+      monthlyFee: agreement.monthlyFee
+        ? agreement.monthlyFee.amount.toString() // ✅
+        : null,
       isActive: agreement.isActive,
       createdAt: agreement.createdAt,
       updatedAt: agreement.updatedAt
