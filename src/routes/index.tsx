@@ -165,12 +165,8 @@ function DashboardPage() {
               <h1 className="font-display text-4xl md:text-5xl font-bold mt-1 capitalize">
                 {monthLabel}
               </h1>
-            </div>
-            {/* Botão de convênios e sair */}
-            <div className="flex gap-2 md:ml-6 mt-4 md:mt-0">
-              <LogoutButton />
-            </div>
           </div>
+        </div>
           <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full">
             <Link to="/transacoes/nova">
               <Plus className="mr-1.5 h-4 w-4" /> Nova movimentação
@@ -313,65 +309,6 @@ function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Recent */}
-        <Card className="bg-gradient-card border-border/50 shadow-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-              Últimas movimentações
-            </CardTitle>
-            <Button variant="ghost" size="sm" asChild className="text-xs">
-              <Link to="/transacoes">Ver todas →</Link>
-            </Button>
-          </CardHeader>
-          <CardContent className="p-0">
-            {loading ? (
-              <div className="p-6 space-y-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            ) : recent.length === 0 ? (
-              <div className="p-12 text-center text-sm text-muted-foreground">
-                Nenhuma movimentação ainda. <Link to="/transacoes/nova" className="text-primary underline">Cadastre a primeira</Link>.
-              </div>
-            ) : (
-              <ul className="divide-y divide-border/40">
-                {recent.map((t) => {
-                  const v = Number(t.final_amount ?? t.amount);
-                  const isReceita = t.type === "receita";
-                  return (
-                    <li key={t.id} className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 transition-colors">
-                      <div
-                        className={`h-9 w-9 rounded-full flex items-center justify-center ${
-                          isReceita ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
-                        }`}
-                      >
-                        {isReceita ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{t.description}</div>
-                        <div className="text-xs text-muted-foreground flex items-center gap-2">
-                          <span>{t.category}</span>
-                          <span>·</span>
-                          <span>{formatDateBR(t.due_date)}</span>
-                          {t.next_payroll && (
-                            <Badge variant="outline" className="text-[10px] py-0 h-4 border-warning/40 text-warning">
-                              próxima folha
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className={`tabular font-semibold ${isReceita ? "text-success" : "text-foreground"}`}>
-                        {isReceita ? "+" : "−"} {formatBRL(v)}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
       </motion.div>
     </AppShell>
   );
