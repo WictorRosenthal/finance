@@ -84,10 +84,7 @@ export class TransactionAggregate {
     if (props.category !== undefined) {
       this.transaction.updateCategory(props.category);
     }
-
-    // handle paymentDate updates (allow set / clear)
     if (props.paymentDate !== undefined) {
-      // prefer domain method if available, otherwise set property directly
       if (typeof (this.transaction as any).updatePaymentDate === 'function') {
         (this.transaction as any).updatePaymentDate(props.paymentDate);
       } else if (typeof (this.transaction as any).clearPaymentDate === 'function' && props.paymentDate === null) {

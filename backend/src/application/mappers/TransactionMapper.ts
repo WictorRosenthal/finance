@@ -33,7 +33,7 @@ export class TransactionMapper {
     accountId: string;
     agreementId?: string;
     date: Date;
-    paymentDate?: Date | null; // ADICIONADO
+    paymentDate?: Date | null; 
   } {
     return {
       description: dto.description,

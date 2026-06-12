@@ -8,7 +8,7 @@ export interface TransactionDTO {
   accountId: string;
   agreementId?: string;
   date: string;
-  paymentDate?: string | null; // ADICIONADO: payment date (ISO) opcional
+  paymentDate?: string | null; 
   createdAt: string;
   updatedAt: string;
 }
@@ -21,7 +21,7 @@ export interface CreateTransactionDTO {
   accountId: string;
   agreementId?: string;
   date: string;
-  paymentDate?: string | null; // ADICIONADO: permitir criar já com paymentDate (opcional)
+  paymentDate?: string | null; 
 }
 
 export interface UpdateTransactionDTO {
@@ -31,7 +31,7 @@ export interface UpdateTransactionDTO {
   category?: string;
   agreementId?: string;
   date?: string;
-  paymentDate?: string | null; // ADICIONADO: permitir atualizar paymentDate
+  paymentDate?: string | null;
 }
 
 export interface TransactionFiltersDTO {
