@@ -1,6 +1,5 @@
-// filepath: backend/src/domain/aggregates/TransactionAggregate.ts
 import { v4 as uuidv4 } from 'uuid';
-import { Transaction, TransactionProps } from '../entities/Transaction';
+import { Transaction } from '../entities/Transaction';
 import { Money, TransactionType } from '../value-objects';
 
 export interface CreateTransactionProps {
@@ -11,6 +10,7 @@ export interface CreateTransactionProps {
   accountId: string;
   agreementId?: string;
   date: Date;
+  paymentDate?: Date | null; 
 }
 
 export interface UpdateTransactionProps {
@@ -20,6 +20,7 @@ export interface UpdateTransactionProps {
   category?: string;
   agreementId?: string;
   date?: Date;
+  paymentDate?: Date | null;
 }
 
 export class TransactionAggregate {
@@ -30,7 +31,6 @@ export class TransactionAggregate {
   }
 
   static create(props: CreateTransactionProps): TransactionAggregate {
-    // Validações de domínio
     if (!props.description || props.description.trim() === '') {
       throw new Error('Description is required');
     }
@@ -48,7 +48,7 @@ export class TransactionAggregate {
     }
 
     const now = new Date();
-    const transactionProps: TransactionProps = {
+    const transactionProps = {
       id: uuidv4(),
       description: props.description.trim(),
       amount: new Money(props.amount),
@@ -57,6 +57,7 @@ export class TransactionAggregate {
       accountId: props.accountId,
       agreementId: props.agreementId,
       date: props.date,
+      paymentDate: props.paymentDate,
       createdAt: now,
       updatedAt: now
     };
@@ -82,6 +83,18 @@ export class TransactionAggregate {
     }
     if (props.category !== undefined) {
       this.transaction.updateCategory(props.category);
+    }
+
+    // handle paymentDate updates (allow set / clear)
+    if (props.paymentDate !== undefined) {
+      // prefer domain method if available, otherwise set property directly
+      if (typeof (this.transaction as any).updatePaymentDate === 'function') {
+        (this.transaction as any).updatePaymentDate(props.paymentDate);
+      } else if (typeof (this.transaction as any).clearPaymentDate === 'function' && props.paymentDate === null) {
+        (this.transaction as any).clearPaymentDate();
+      } else {
+        (this.transaction as any).paymentDate = props.paymentDate;
+      }
     }
   }
 

@@ -1,4 +1,3 @@
-// filepath: backend/src/domain/repositories/ITransactionRepository.ts
 import { Transaction } from '../entities/Transaction';
 
 export interface TransactionFilters {

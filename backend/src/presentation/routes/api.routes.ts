@@ -20,6 +20,7 @@ export async function registerRoutes(app: FastifyInstance) {
   app.get('/api/transactions/:id', transactionController.getById.bind(transactionController));
   app.put('/api/transactions/:id', transactionController.update.bind(transactionController));
   app.delete('/api/transactions/:id', transactionController.delete.bind(transactionController));
+  app.patch('/api/transactions/:id/pay', transactionController.markAsPaid.bind(transactionController));
 
   // Accounts
   app.post('/api/accounts', accountController.create.bind(accountController));
@@ -36,7 +37,7 @@ export async function registerRoutes(app: FastifyInstance) {
   app.delete('/api/agreements/:id', agreementController.delete.bind(agreementController));
 
   // Auth
-  app.post('/api/register', authController.register.bind(authController)); // <-- Cadastro de usuário
+  app.post('/api/register', authController.register.bind(authController)); 
   app.post('/api/login', authController.login.bind(authController));
   app.post('/api/oauth/callback', authController.oauthCallback.bind(authController));
 

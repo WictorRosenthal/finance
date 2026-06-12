@@ -1,4 +1,3 @@
-// filepath: backend/src/presentation/controllers/TransactionController.ts
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { container } from '../../infrastructure/container/Container';
 import { CreateTransactionUseCase } from '../../application/use-cases/transactions/CreateTransactionUseCase';
@@ -7,7 +6,7 @@ import { GetTransactionByIdUseCase } from '../../application/use-cases/transacti
 import { UpdateTransactionUseCase } from '../../application/use-cases/transactions/UpdateTransactionUseCase';
 import { DeleteTransactionUseCase } from '../../application/use-cases/transactions/DeleteTransactionUseCase';
 import { CreateTransactionDTO, TransactionFiltersDTO, UpdateTransactionDTO } from '../../application/dto/TransactionDTO';
-
+import { MarkTransactionAsPaidUseCase } from '../../application/use-cases/transactions/MarkTransactionAsPaidUseCase';
 export class TransactionController {
   async create(request: FastifyRequest, reply: FastifyReply) {
     const useCase = container.resolve(CreateTransactionUseCase);
@@ -43,5 +42,11 @@ export class TransactionController {
     const useCase = container.resolve(DeleteTransactionUseCase);
     await useCase.execute(id);
     return reply.status(204).send();
+  }
+  async markAsPaid(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string };
+    const useCase = container.resolve(MarkTransactionAsPaidUseCase);
+    const result = await useCase.execute(id);
+    return reply.send(result);
   }
 }

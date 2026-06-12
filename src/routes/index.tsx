@@ -14,7 +14,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { ArrowDownRight, ArrowUpRight, Wallet, TrendingUp, Plus, LogOut } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Wallet, TrendingUp, Plus, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,25 +90,60 @@ function LogoutButton() {
   );
 }
 
+// produce local YYYY-MM-DD (avoid UTC shift)
+function isoDateLocal(d: Date) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// timezone offset like +02:00 or -03:00
+function tzOffsetString() {
+  const offset = -new Date().getTimezoneOffset(); // minutes
+  const sign = offset >= 0 ? "+" : "-";
+  const abs = Math.abs(offset);
+  const hours = String(Math.floor(abs / 60)).padStart(2, "0");
+  const mins = String(abs % 60).padStart(2, "0");
+  return `${sign}${hours}:${mins}`;
+}
+
 function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [monthTx, setMonthTx] = useState<Tx[]>([]);
   const [recent, setRecent] = useState<Tx[]>([]);
+  // control current month shown (use first day of month)
+  const [currentMonth, setCurrentMonth] = useState<Date>(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
 
   useEffect(() => {
     void load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMonth]);
 
   async function load() {
     setLoading(true);
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().slice(0, 10);
+
+    // compute local date strings for start (first day) and end (last day of month)
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstOfMonth = new Date(year, month, 1);
+    const lastOfMonth = new Date(year, month + 1, 0); // last day of current month
+
+    const startDate = isoDateLocal(firstOfMonth); // YYYY-MM-DD
+    const endDate = isoDateLocal(lastOfMonth);    // YYYY-MM-DD
 
     try {
+      // send with local times to avoid timezone shift (start at 00:00:00 local, end at 23:59:59 local)
+      const tz = tzOffsetString();
+      const startParam = `${startDate}T00:00:00${tz}`;
+      const endParam = `${endDate}T23:59:59${tz}`;
+
       const [monthRes, recentRes] = await Promise.all([
         api<{ data: TransactionApiDTO[]; total: number; page: number; limit: number; totalPages: number }>(
-          `/api/transactions?startDate=${start}&endDate=${end}&page=1&limit=100`,
+          `/api/transactions?startDate=${encodeURIComponent(startParam)}&endDate=${encodeURIComponent(endParam)}&page=1&limit=500`,
         ),
         api<{ data: TransactionApiDTO[]; total: number; page: number; limit: number; totalPages: number }>(
           `/api/transactions?page=1&limit=5`,
@@ -122,6 +157,17 @@ function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function prevMonth() {
+    setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1));
+  }
+  function nextMonth() {
+    setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1));
+  }
+  function resetToNow() {
+    const now = new Date();
+    setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
   }
 
   const { receitas, despesas, saldo, despPorCategoria, recPorCategoria } = useMemo(() => {
@@ -148,7 +194,7 @@ function DashboardPage() {
     };
   }, [monthTx]);
 
-  const monthLabel = new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  const monthLabel = currentMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
   return (
     <AppShell>
@@ -162,11 +208,27 @@ function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-end gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Visão geral</p>
-              <h1 className="font-display text-4xl md:text-5xl font-bold mt-1 capitalize">
-                {monthLabel}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="font-display text-4xl md:text-5xl font-bold mt-1 capitalize">
+                  {monthLabel}
+                </h1>
+
+                <div className="flex items-center gap-2 ml-3">
+                  <Button variant="ghost" size="icon" onClick={prevMonth} aria-label="Mês anterior">
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={resetToNow} aria-label="Mês atual">
+                    Hoje
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={nextMonth} aria-label="Próximo mês">
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 md:ml-6 mt-4 md:mt-0"> 
+            </div>
           </div>
-        </div>
           <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full">
             <Link to="/transacoes/nova">
               <Plus className="mr-1.5 h-4 w-4" /> Nova movimentação

@@ -1,4 +1,3 @@
-// filepath: backend/src/application/dto/TransactionDTO.ts
 export interface TransactionDTO {
   id: string;
   description: string;
@@ -9,6 +8,7 @@ export interface TransactionDTO {
   accountId: string;
   agreementId?: string;
   date: string;
+  paymentDate?: string | null; // ADICIONADO: payment date (ISO) opcional
   createdAt: string;
   updatedAt: string;
 }
@@ -21,6 +21,7 @@ export interface CreateTransactionDTO {
   accountId: string;
   agreementId?: string;
   date: string;
+  paymentDate?: string | null; // ADICIONADO: permitir criar já com paymentDate (opcional)
 }
 
 export interface UpdateTransactionDTO {
@@ -30,6 +31,7 @@ export interface UpdateTransactionDTO {
   category?: string;
   agreementId?: string;
   date?: string;
+  paymentDate?: string | null; // ADICIONADO: permitir atualizar paymentDate
 }
 
 export interface TransactionFiltersDTO {

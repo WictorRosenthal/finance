@@ -2,7 +2,7 @@ import { api } from "@/lib/api";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowDownRight, ArrowUpRight, Pencil, Plus, Search, Trash2, Filter } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Pencil, Plus, Search, Trash2, Filter, Check } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
@@ -63,25 +63,64 @@ type TransactionApiDTO = {
   date: string;
   createdAt: string;
   updatedAt: string;
+  paymentDate?: string | null;
+  payment_date?: string | null;
+  paidAt?: string | null;
+  paid_at?: string | null;
+  paymentMethod?: string | null;
+  payment_method?: string | null;
+  finalAmount?: number | null;
+  final_amount?: number | null;
+  notes?: string | null;
 };
 
-function mapApiTx(tx: TransactionApiDTO): Tx {
+function mapApiTx(tx: TransactionApiDTO & Record<string, any>): Tx {
+  const paymentDate =
+    tx.paymentDate ??
+    tx.payment_date ??
+    tx.paidAt ??
+    tx.paid_at ??
+    null;
+
+  const paymentMethod =
+    tx.paymentMethod ??
+    tx.payment_method ??
+    null;
+
   return {
     id: tx.id,
     type: tx.type === "INCOME" ? "receita" : "despesa",
     amount: tx.amount,
-    final_amount: tx.amount,
+    final_amount: tx.finalAmount ?? tx.final_amount ?? tx.amount,
     description: tx.description,
-    due_date: tx.date || null,
-    payment_date: null,
-    payment_method: null,
+    due_date: tx.date ?? null,
+    payment_date: paymentDate,
+    payment_method: paymentMethod,
     category: tx.category,
     convenio_id: tx.agreementId ?? null,
-    is_paid: false,
+    is_paid: !!paymentDate,
     next_payroll: false,
     account_id: tx.accountId ?? null,
-    notes: null,
+    notes: tx.notes ?? null,
   };
+}
+
+// produce local YYYY-MM-DD (avoid UTC shift)
+function isoDateLocal(d: Date) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// timezone offset like +02:00 or -03:00
+function tzOffsetString() {
+  const offset = -new Date().getTimezoneOffset(); // minutes
+  const sign = offset >= 0 ? "+" : "-";
+  const abs = Math.abs(offset);
+  const hours = String(Math.floor(abs / 60)).padStart(2, "0");
+  const mins = String(abs % 60).padStart(2, "0");
+  return `${sign}${hours}:${mins}`;
 }
 
 function TransactionsPage() {
@@ -90,27 +129,77 @@ function TransactionsPage() {
   const [search, setSearch] = useState("");
   const [type, setType] = useState<string>("all");
   const [category, setCategory] = useState<string>("all");
-  const [status, setStatus] = useState<string>("all");
+  const [status, setStatus] = useState<string>("all"); // paid | pending | all
   const [toDelete, setToDelete] = useState<Tx | null>(null);
 
+  // date range state: default = current month (local first and last day)
+  const nowDefault = new Date();
+  const firstOfMonth = new Date(nowDefault.getFullYear(), nowDefault.getMonth(), 1);
+  const lastOfMonth = new Date(nowDefault.getFullYear(), nowDefault.getMonth() + 1, 0);
+  const [startDate, setStartDate] = useState<string>(isoDateLocal(firstOfMonth));
+  const [endDate, setEndDate] = useState<string>(isoDateLocal(lastOfMonth));
+
   useEffect(() => {
-    void load();
+    void load(); // load with default start/end
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function load() {
+  async function load(optionalStart?: string, optionalEnd?: string) {
     setLoading(true);
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().slice(0, 10);
+
+    const s = optionalStart ?? startDate; // 'YYYY-MM-DD'
+    const e = optionalEnd ?? endDate;     // 'YYYY-MM-DD'
 
     try {
-      const res = await api<{ data: TransactionApiDTO[] }>(`/api/transactions?startDate=${start}&endDate=${end}&page=1&limit=100`);
-      setItems((res.data ?? []).map(mapApiTx));
+      // send local-day range: start at 00:00:00 local, end at 23:59:59 local
+      const tz = tzOffsetString();
+      const startParam = `${s}T00:00:00${tz}`;
+      const endParam = `${e}T23:59:59${tz}`;
+
+      const res = await api<{ data: TransactionApiDTO[] }>(
+        `/api/transactions?startDate=${encodeURIComponent(startParam)}&endDate=${encodeURIComponent(endParam)}&page=1&limit=1000`
+      );
+
+      const now = new Date(); // compute next_payroll relative to "today"
+      const firstOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const firstOfMonthAfterNext = new Date(firstOfNextMonth.getFullYear(), firstOfNextMonth.getMonth() + 1, 1);
+
+      const mapped = (res.data ?? []).map((tx) => {
+        const m = mapApiTx(tx);
+        if (m.due_date) {
+          const due = new Date(m.due_date);
+          m.next_payroll = due >= firstOfNextMonth && due < firstOfMonthAfterNext;
+        } else {
+          m.next_payroll = false;
+        }
+        return m;
+      });
+
+      // sort by due_date desc
+      mapped.sort((a, b) => {
+        const da = a.due_date ?? "";
+        const db = b.due_date ?? "";
+        return db.localeCompare(da);
+      });
+
+      setItems(mapped);
     } catch (err: any) {
       toast.error(err?.message || "Erro ao carregar movimentações");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSearchByRange() {
+    if (!startDate || !endDate) {
+      toast.error("Informe data inicial e final");
+      return;
+    }
+    if (startDate > endDate) {
+      toast.error("Data inicial não pode ser maior que a final");
+      return;
+    }
+    void load(startDate, endDate);
   }
 
   async function handleDelete() {
@@ -127,13 +216,40 @@ function TransactionsPage() {
     setToDelete(null);
   }
 
+  // mark as paid
+  async function markAsPaid(id: string, paymentDate?: string | null) {
+    try {
+      // determine ISO payment date to send
+      const iso = paymentDate ?? new Date().toISOString();
+
+      const res = await api<{ data: TransactionApiDTO }>(`/api/transactions/${id}/pay`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentDate: iso }),
+      });
+
+      const updated = res?.data ? mapApiTx(res.data as TransactionApiDTO & Record<string, any>) : null;
+
+      setItems((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? updated ?? { ...t, is_paid: true, payment_date: iso }
+            : t
+        )
+      );
+
+      toast.success("Movimentação marcada como paga");
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao marcar como pago");
+    }
+  }
+
   const filtered = useMemo(() => {
     return items.filter((t) => {
       if (type !== "all" && t.type !== type) return false;
       if (category !== "all" && t.category !== category) return false;
       if (status === "paid" && !t.is_paid) return false;
       if (status === "pending" && t.is_paid) return false;
-      if (status === "next_payroll" && !t.next_payroll) return false;
       if (search && !t.description.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
@@ -169,6 +285,29 @@ function TransactionsPage() {
                 className="pl-9 bg-background/50"
               />
             </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-muted-foreground mr-2">De</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="rounded-md border bg-background/50 px-2 py-1 text-sm"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-muted-foreground mr-2">Até</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="rounded-md border bg-background/50 px-2 py-1 text-sm"
+              />
+            </div>
+
+            <Button onClick={handleSearchByRange} className="h-9">Buscar</Button>
+
             <Select value={type} onValueChange={setType}>
               <SelectTrigger className="w-[140px] bg-background/50"><Filter className="h-3 w-3 mr-1" /><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -177,6 +316,7 @@ function TransactionsPage() {
                 <SelectItem value="despesa">Despesas</SelectItem>
               </SelectContent>
             </Select>
+
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="w-[180px] bg-background/50"><SelectValue placeholder="Categoria" /></SelectTrigger>
               <SelectContent>
@@ -186,13 +326,13 @@ function TransactionsPage() {
                 ))}
               </SelectContent>
             </Select>
+
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger className="w-[170px] bg-background/50"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos status</SelectItem>
                 <SelectItem value="paid">Pagas</SelectItem>
                 <SelectItem value="pending">Pendentes</SelectItem>
-                <SelectItem value="next_payroll">Próxima folha</SelectItem>
               </SelectContent>
             </Select>
           </CardContent>
@@ -258,6 +398,17 @@ function TransactionsPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
+                        {!t.is_paid && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Marcar como pago"
+                            onClick={() => markAsPaid(t.id)}
+                            className="h-8 w-8 text-success hover:text-success"
+                          >
+                            <Check className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8">
                           <Link to="/transacoes/$id" params={{ id: t.id }}>
                             <Pencil className="h-3.5 w-3.5" />

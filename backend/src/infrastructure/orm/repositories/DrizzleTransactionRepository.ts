@@ -2,11 +2,12 @@
 import { inject, injectable } from 'tsyringe';
 import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import { ITransactionRepository, TransactionFilters } from '../../../domain/repositories/ITransactionRepository';
-import { Transaction, TransactionProps } from '../../../domain/entities/Transaction';
+import { Transaction } from '../../../domain/entities/Transaction';
 import { Money, TransactionType } from '../../../domain/value-objects';
 import { db } from '../../database/connection';
 import { transactions, TransactionDb } from '../schema';
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+
 
 type TransactionInsert = InferInsertModel<typeof transactions>;
 type TransactionSelect = InferSelectModel<typeof transactions>;
@@ -123,7 +124,8 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
   }
 
   private mapToEntity(dbRecord: TransactionDb): Transaction {
-    const props: TransactionProps = {
+    const paymentDateValue = (dbRecord as any).paymentDate;
+    const props = {
       id: dbRecord.id,
       description: dbRecord.description,
       amount: new Money(parseFloat(dbRecord.amount), 'BRL'),
@@ -132,6 +134,9 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
       accountId: dbRecord.accountId,
       agreementId: dbRecord.agreementId ?? undefined,
       date: new Date(dbRecord.date),
+      paymentDate: paymentDateValue
+        ? new Date(paymentDateValue)
+        : undefined,
       createdAt: new Date(dbRecord.createdAt),
       updatedAt: new Date(dbRecord.updatedAt)
     };
@@ -139,7 +144,7 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
   }
 
   private mapToDb(transaction: Transaction): TransactionInsert {
-    return {
+    const dbObj = {
       id: transaction.id,
       description: transaction.description,
       amount: transaction.amount.amount.toFixed(2),
@@ -148,8 +153,10 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
       accountId: transaction.accountId,
       agreementId: transaction.agreementId ?? null,
       date: transaction.date,
+      paymentDate: transaction.paymentDate ?? null,
       createdAt: transaction.createdAt ?? new Date(),
       updatedAt: transaction.updatedAt ?? new Date()
     };
+    return dbObj as unknown as TransactionInsert;
   }
 }

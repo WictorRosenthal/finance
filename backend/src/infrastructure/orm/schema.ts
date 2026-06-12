@@ -11,6 +11,7 @@ export const transactions = pgTable('transactions', {
   accountId: uuid('account_id').notNull(),
   agreementId: uuid('agreement_id'),
   date: timestamp('date').notNull(),
+  paymentDate: timestamp("payment_date", {mode: "date",}).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 });

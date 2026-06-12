@@ -16,17 +16,14 @@ export class UpdateTransactionUseCase {
   ) {}
 
   async execute(id: string, dto: UpdateTransactionDTO): Promise<TransactionDTO> {
-    // Buscar transação existente
     const existingTransaction = await this.transactionRepository.findById(id);
 
     if (!existingTransaction) {
       throw new NotFoundError('Transaction', id);
     }
 
-    // Criar aggregate a partir da entidade existente
     const aggregate = TransactionAggregate.fromEntity(existingTransaction);
 
-    // Aplicar atualizações
     const updateProps: {
       description?: string;
       amount?: number;
@@ -34,6 +31,7 @@ export class UpdateTransactionUseCase {
       category?: string;
       agreementId?: string;
       date?: Date;
+      paymentDate?: Date | null;
     } = {};
 
     if (dto.description !== undefined) {
@@ -54,10 +52,13 @@ export class UpdateTransactionUseCase {
     if (dto.date !== undefined) {
       updateProps.date = new Date(dto.date);
     }
+    if ((dto as any).paymentDate !== undefined) {
+      updateProps.paymentDate =
+        (dto as any).paymentDate === null ? null : new Date((dto as any).paymentDate);
+    }
 
     aggregate.update(updateProps);
 
-    // Persistir
     const updatedTransaction = await this.transactionRepository.update(
       aggregate.getTransaction()
     );

@@ -1,7 +1,6 @@
-// filepath: backend/src/domain/entities/Transaction.ts
 import { Money, TransactionType } from '../value-objects';
 
-export interface TransactionProps {
+interface TransactionProps {
   id: string;
   description: string;
   amount: Money;
@@ -10,15 +9,21 @@ export interface TransactionProps {
   accountId: string;
   agreementId?: string;
   date: Date;
+  paymentDate?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
+
 
 export class Transaction {
   private readonly props: TransactionProps;
 
   constructor(props: TransactionProps) {
     this.props = props;
+  }
+
+  get paymentDate(): Date | undefined {
+    return this.props.paymentDate ?? undefined;
   }
 
   get id(): string {
@@ -78,6 +83,16 @@ export class Transaction {
     this.props.category = category;
     this.props.updatedAt = new Date();
   }
+
+  markAsPaid(): void {
+    if (this.props.paymentDate) {
+      throw new Error("Transaction already paid");
+    }
+
+    this.props.paymentDate = new Date();
+    this.props.updatedAt = new Date();
+  }
+
 
   toPlainObject(): TransactionProps {
     return { ...this.props };

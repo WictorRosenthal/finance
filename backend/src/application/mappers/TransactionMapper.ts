@@ -1,4 +1,3 @@
-// filepath: backend/src/application/mappers/TransactionMapper.ts
 import { Transaction } from '../../domain/entities/Transaction';
 import { TransactionDTO, CreateTransactionDTO, TransactionFiltersDTO } from '../dto/TransactionDTO';
 import { TransactionType } from '../../domain/value-objects';
@@ -16,6 +15,7 @@ export class TransactionMapper {
       accountId: transaction.accountId,
       agreementId: transaction.agreementId,
       date: transaction.date.toISOString(),
+      paymentDate: (transaction as any).paymentDate ? (transaction as any).paymentDate.toISOString() : null, 
       createdAt: transaction.createdAt.toISOString(),
       updatedAt: transaction.updatedAt.toISOString()
     };
@@ -33,6 +33,7 @@ export class TransactionMapper {
     accountId: string;
     agreementId?: string;
     date: Date;
+    paymentDate?: Date | null; // ADICIONADO
   } {
     return {
       description: dto.description,
@@ -41,7 +42,13 @@ export class TransactionMapper {
       category: dto.category,
       accountId: dto.accountId,
       agreementId: dto.agreementId,
-      date: new Date(dto.date)
+      date: new Date(dto.date),
+      paymentDate:
+        dto.paymentDate === undefined
+          ? undefined
+          : dto.paymentDate === null
+          ? null
+          : new Date(dto.paymentDate),
     };
   }
 

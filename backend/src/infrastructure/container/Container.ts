@@ -5,7 +5,6 @@ import { container } from 'tsyringe';
 import { ITransactionRepository } from '../../domain/repositories/ITransactionRepository.js';
 import { IAccountRepository } from '../../domain/repositories/IAccountRepository.js';
 import { IAgreementRepository } from '../../domain/repositories/IAgreementRepository.js';
-
 import { DrizzleTransactionRepository } from '../orm/repositories/DrizzleTransactionRepository.js';
 import { DrizzleAccountRepository } from '../orm/repositories/DrizzleAccountRepository.js';
 import { DrizzleAgreementRepository } from '../orm/repositories/DrizzleAgreementRepository.js';
@@ -16,7 +15,7 @@ import { GetTransactionsUseCase } from '../../application/use-cases/transactions
 import { GetTransactionByIdUseCase } from '../../application/use-cases/transactions/GetTransactionByIdUseCase.js';
 import { UpdateTransactionUseCase } from '../../application/use-cases/transactions/UpdateTransactionUseCase.js';
 import { DeleteTransactionUseCase } from '../../application/use-cases/transactions/DeleteTransactionUseCase.js';
-
+import { MarkTransactionAsPaidUseCase } from '../../application/use-cases/transactions/MarkTransactionAsPaidUseCase.js';
 // Use Cases - Accounts
 import { CreateAccountUseCase } from '../../application/use-cases/accounts/CreateAccountUseCase.js';
 import { GetAccountsUseCase } from '../../application/use-cases/accounts/GetAccountsUseCase.js';
@@ -67,6 +66,7 @@ container.registerSingleton(GetTransactionsUseCase);
 container.registerSingleton(GetTransactionByIdUseCase);
 container.registerSingleton(UpdateTransactionUseCase);
 container.registerSingleton(DeleteTransactionUseCase);
+container.registerSingleton(MarkTransactionAsPaidUseCase);
 
 container.registerSingleton(CreateAccountUseCase);
 container.registerSingleton(GetAccountsUseCase);
