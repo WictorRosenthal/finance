@@ -2,7 +2,6 @@ import { FastifyInstance } from 'fastify';
 import { TransactionController } from '../controllers/TransactionController';
 import { AccountController } from '../controllers/AccountController';
 import { AgreementController } from '../controllers/AgreementController';
-import { authRoutes } from './authRoutes';
 import { AuthController } from '@presentation/controllers/AuthController';
 import { authenticateJWT } from '../middleware/authMiddleware';
 
@@ -11,9 +10,6 @@ export async function registerRoutes(app: FastifyInstance) {
   const accountController = new AccountController();
   const agreementController = new AgreementController();
   const authController = new AuthController();
-
-  // Auth routes (JWT/OAuth)
-  await authRoutes(app);
 
   app.post('/api/register', authController.register.bind(authController));
   app.post('/api/login', authController.login.bind(authController));

@@ -1,6 +1,7 @@
 // filepath: backend/src/application/use-cases/transactions/UpdateTransactionUseCase.ts
 import { inject, injectable } from 'tsyringe';
 import { ITransactionRepository } from '../../../domain/repositories/ITransactionRepository';
+import { IAgreementRepository } from '../../../domain/repositories/IAgreementRepository';
 import { TransactionAggregate } from '../../../domain/aggregates/TransactionAggregate';
 import { TransactionMapper } from '../../mappers/TransactionMapper';
 import { UpdateTransactionDTO, TransactionDTO } from '../../dto/TransactionDTO';
@@ -12,7 +13,9 @@ import { Money } from '../../../domain/value-objects';
 export class UpdateTransactionUseCase {
   constructor(
     @inject('ITransactionRepository')
-    private readonly transactionRepository: ITransactionRepository
+    private readonly transactionRepository: ITransactionRepository,
+    @inject('IAgreementRepository')
+    private readonly agreementRepository: IAgreementRepository
   ) {}
 
   async execute(userId: string, id: string, dto: UpdateTransactionDTO): Promise<TransactionDTO> {
@@ -47,6 +50,9 @@ export class UpdateTransactionUseCase {
       updateProps.category = dto.category;
     }
     if (dto.agreementId !== undefined) {
+      if (dto.agreementId && !await this.agreementRepository.findById(userId, dto.agreementId)) {
+        throw new NotFoundError('Agreement', dto.agreementId);
+      }
       updateProps.agreementId = dto.agreementId;
     }
     if (dto.date !== undefined) {
