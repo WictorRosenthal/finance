@@ -3,9 +3,9 @@ export class Money {
   private readonly _amount: number;
   private readonly _currency: string;
 
-  constructor(amount: number, currency: string = 'BRL') {
+  constructor(amount: number, currency: string = "BRL") {
     if (amount < 0) {
-      throw new Error('Amount cannot be negative');
+      throw new Error("Amount cannot be negative");
     }
     this._amount = Math.round(amount * 100) / 100;
     this._currency = currency;
@@ -36,7 +36,7 @@ export class Money {
   // ✅ NOVO MÉTODO
   applyDiscount(percent: number): Money {
     if (percent < 0 || percent > 100) {
-      throw new Error('Discount percentage must be between 0 and 100');
+      throw new Error("Discount percentage must be between 0 and 100");
     }
 
     const discountAmount = this._amount * (percent / 100);
@@ -63,18 +63,18 @@ export class Money {
 
   private ensureSameCurrency(other: Money): void {
     if (this._currency !== other._currency) {
-      throw new Error('Currency mismatch');
+      throw new Error("Currency mismatch");
     }
   }
 
   toString(): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: this._currency
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: this._currency,
     }).format(this._amount);
   }
 
-  static zero(currency: string = 'BRL'): Money {
+  static zero(currency: string = "BRL"): Money {
     return new Money(0, currency);
   }
 }

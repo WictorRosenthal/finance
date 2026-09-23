@@ -1,6 +1,6 @@
 // filepath: backend/src/application/mappers/AgreementMapper.ts
-import { Agreement } from '../../domain/entities/Agreement';
-import { AgreementDTO, CreateAgreementDTO } from '../dto/AgreementDTO';
+import { Agreement } from "../../domain/entities/Agreement";
+import { AgreementDTO, CreateAgreementDTO } from "../dto/AgreementDTO";
 
 export class AgreementMapper {
   static toDTO(agreement: Agreement): AgreementDTO {
@@ -12,7 +12,7 @@ export class AgreementMapper {
       currency: agreement.monthlyFee?.currency,
       isActive: agreement.isActive,
       createdAt: agreement.createdAt.toISOString(),
-      updatedAt: agreement.updatedAt.toISOString()
+      updatedAt: agreement.updatedAt.toISOString(),
     };
   }
 
@@ -28,7 +28,7 @@ export class AgreementMapper {
     return {
       name: dto.name,
       category: dto.category,
-      monthlyFee: dto.monthlyFee
+      monthlyFee: dto.monthlyFee,
     };
   }
 }

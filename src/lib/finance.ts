@@ -81,7 +81,7 @@ export function applyDiscount(amount: number, discountPercent: number): number {
 export function fallsInNextPayroll(
   payment_date: string | null,
   due_date: string | null,
-  cutoff_day: number
+  cutoff_day: number,
 ): boolean {
   const ref = payment_date ?? due_date;
   if (!ref) return false;

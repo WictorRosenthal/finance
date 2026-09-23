@@ -1,13 +1,15 @@
 // filepath: backend/src/infrastructure/orm/repositories/DrizzleTransactionRepository.ts
-import { inject, injectable } from 'tsyringe';
-import { eq, and, gte, lte, sql } from 'drizzle-orm';
-import { ITransactionRepository, TransactionFilters } from '../../../domain/repositories/ITransactionRepository';
-import { Transaction } from '../../../domain/entities/Transaction';
-import { Money, TransactionType } from '../../../domain/value-objects';
-import { db } from '../../database/connection';
-import { transactions, TransactionDb } from '../schema';
-import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-
+import { inject, injectable } from "tsyringe";
+import { eq, and, gte, lte, sql } from "drizzle-orm";
+import {
+  ITransactionRepository,
+  TransactionFilters,
+} from "../../../domain/repositories/ITransactionRepository";
+import { Transaction } from "../../../domain/entities/Transaction";
+import { Money, TransactionType } from "../../../domain/value-objects";
+import { db } from "../../database/connection";
+import { transactions, TransactionDb } from "../schema";
+import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 type TransactionInsert = InferInsertModel<typeof transactions>;
 type TransactionSelect = InferSelectModel<typeof transactions>;
@@ -15,15 +17,18 @@ type TransactionSelect = InferSelectModel<typeof transactions>;
 @injectable()
 export class DrizzleTransactionRepository implements ITransactionRepository {
   async findById(userId: string, id: string): Promise<Transaction | null> {
-    const result = await db.select().from(transactions).where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+    const result = await db
+      .select()
+      .from(transactions)
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
     return result[0] ? this.mapToEntity(result[0]) : null;
   }
 
   async findAll(userId: string, filters?: TransactionFilters): Promise<Transaction[]> {
     let query = db.select().from(transactions);
-    
+
     const conditions = [eq(transactions.userId, userId)];
-    
+
     if (filters?.accountId) {
       conditions.push(eq(transactions.accountId, filters.accountId));
     }
@@ -44,7 +49,10 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
     }
 
     if (conditions.length > 0) {
-      const result = await db.select().from(transactions).where(and(...conditions));
+      const result = await db
+        .select()
+        .from(transactions)
+        .where(and(...conditions));
       return result.map(this.mapToEntity);
     }
 
@@ -64,7 +72,13 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
     const result = await db
       .select()
       .from(transactions)
-      .where(and(eq(transactions.userId, userId), gte(transactions.date, startDate), lte(transactions.date, endDate)));
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          gte(transactions.date, startDate),
+          lte(transactions.date, endDate),
+        ),
+      );
     return result.map(this.mapToEntity);
   }
 
@@ -85,12 +99,14 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
   }
 
   async delete(userId: string, id: string): Promise<void> {
-    await db.delete(transactions).where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+    await db
+      .delete(transactions)
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
   }
 
   async count(userId: string, filters?: TransactionFilters): Promise<number> {
     const conditions = [eq(transactions.userId, userId)];
-    
+
     if (filters?.accountId) {
       conditions.push(eq(transactions.accountId, filters.accountId));
     }
@@ -110,16 +126,17 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
       conditions.push(lte(transactions.date, filters.endDate));
     }
 
-    const countQuery = db.select({ count: sql<number>`count(*)`.as('count') }).from(transactions);
-    
+    const countQuery = db.select({ count: sql<number>`count(*)`.as("count") }).from(transactions);
+
     if (conditions.length > 0) {
-      const result = await db.select({ count: sql<number>`count(*)`.as('count') })
+      const result = await db
+        .select({ count: sql<number>`count(*)`.as("count") })
         .from(transactions)
         .where(and(...conditions));
       return result[0]?.count ?? 0;
     }
 
-    const result = await db.select({ count: sql<number>`count(*)`.as('count') }).from(transactions);
+    const result = await db.select({ count: sql<number>`count(*)`.as("count") }).from(transactions);
     return result[0]?.count ?? 0;
   }
 
@@ -129,17 +146,15 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
       id: dbRecord.id,
       userId: dbRecord.userId,
       description: dbRecord.description,
-      amount: new Money(parseFloat(dbRecord.amount), 'BRL'),
+      amount: new Money(parseFloat(dbRecord.amount), "BRL"),
       type: dbRecord.type as TransactionType,
       category: dbRecord.category,
       accountId: dbRecord.accountId,
       agreementId: dbRecord.agreementId ?? undefined,
       date: new Date(dbRecord.date),
-      paymentDate: paymentDateValue
-        ? new Date(paymentDateValue)
-        : undefined,
+      paymentDate: paymentDateValue ? new Date(paymentDateValue) : undefined,
       createdAt: new Date(dbRecord.createdAt),
-      updatedAt: new Date(dbRecord.updatedAt)
+      updatedAt: new Date(dbRecord.updatedAt),
     };
     return new Transaction(props);
   }
@@ -157,7 +172,7 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
       date: transaction.date,
       paymentDate: transaction.paymentDate ?? null,
       createdAt: transaction.createdAt ?? new Date(),
-      updatedAt: transaction.updatedAt ?? new Date()
+      updatedAt: transaction.updatedAt ?? new Date(),
     };
     return dbObj as unknown as TransactionInsert;
   }

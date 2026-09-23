@@ -14,7 +14,16 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { ArrowDownRight, ArrowUpRight, Wallet, TrendingUp, Plus, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Wallet,
+  TrendingUp,
+  Plus,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -133,7 +142,7 @@ function DashboardPage() {
     const lastOfMonth = new Date(year, month + 1, 0); // last day of current month
 
     const startDate = isoDateLocal(firstOfMonth); // YYYY-MM-DD
-    const endDate = isoDateLocal(lastOfMonth);    // YYYY-MM-DD
+    const endDate = isoDateLocal(lastOfMonth); // YYYY-MM-DD
 
     try {
       // send with local times to avoid timezone shift (start at 00:00:00 local, end at 23:59:59 local)
@@ -142,12 +151,22 @@ function DashboardPage() {
       const endParam = `${endDate}T23:59:59${tz}`;
 
       const [monthRes, recentRes] = await Promise.all([
-        api<{ data: TransactionApiDTO[]; total: number; page: number; limit: number; totalPages: number }>(
+        api<{
+          data: TransactionApiDTO[];
+          total: number;
+          page: number;
+          limit: number;
+          totalPages: number;
+        }>(
           `/api/transactions?startDate=${encodeURIComponent(startParam)}&endDate=${encodeURIComponent(endParam)}&page=1&limit=500`,
         ),
-        api<{ data: TransactionApiDTO[]; total: number; page: number; limit: number; totalPages: number }>(
-          `/api/transactions?page=1&limit=5`,
-        ),
+        api<{
+          data: TransactionApiDTO[];
+          total: number;
+          page: number;
+          limit: number;
+          totalPages: number;
+        }>(`/api/transactions?page=1&limit=5`),
       ]);
 
       setMonthTx((monthRes.data ?? []).map(mapApiTx));
@@ -177,9 +196,11 @@ function DashboardPage() {
 
     const groupBy = (type: "receita" | "despesa") => {
       const map = new Map<string, number>();
-      monthTx.filter((t) => t.type === type).forEach((t) => {
-        map.set(t.category, (map.get(t.category) ?? 0) + val(t));
-      });
+      monthTx
+        .filter((t) => t.type === type)
+        .forEach((t) => {
+          map.set(t.category, (map.get(t.category) ?? 0) + val(t));
+        });
       return Array.from(map.entries())
         .map(([category, total]) => ({ category, total }))
         .sort((a, b) => b.total - a.total);
@@ -207,7 +228,9 @@ function DashboardPage() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="flex flex-col md:flex-row md:items-end gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Visão geral</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Visão geral
+              </p>
               <div className="flex items-center gap-3">
                 <h1 className="font-display text-4xl md:text-5xl font-bold mt-1 capitalize">
                   {monthLabel}
@@ -226,10 +249,13 @@ function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 md:ml-6 mt-4 md:mt-0"> 
-            </div>
+            <div className="flex items-center gap-2 md:ml-6 mt-4 md:mt-0"></div>
           </div>
-          <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full">
+          <Button
+            asChild
+            size="lg"
+            className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full"
+          >
             <Link to="/transacoes/nova">
               <Plus className="mr-1.5 h-4 w-4" /> Nova movimentação
             </Link>
@@ -304,7 +330,10 @@ function DashboardPage() {
                     />
                     <Bar dataKey="total" radius={[8, 8, 0, 0]}>
                       {despPorCategoria.map((d, i) => (
-                        <Cell key={i} fill={CATEGORY_COLORS[d.category] ?? "var(--color-chart-2)"} />
+                        <Cell
+                          key={i}
+                          fill={CATEGORY_COLORS[d.category] ?? "var(--color-chart-2)"}
+                        />
                       ))}
                     </Bar>
                   </BarChart>
@@ -338,7 +367,10 @@ function DashboardPage() {
                         stroke="none"
                       >
                         {recPorCategoria.map((d, i) => (
-                          <Cell key={i} fill={CATEGORY_COLORS[d.category] ?? "var(--color-chart-1)"} />
+                          <Cell
+                            key={i}
+                            fill={CATEGORY_COLORS[d.category] ?? "var(--color-chart-1)"}
+                          />
                         ))}
                       </Pie>
                       <Tooltip
@@ -410,7 +442,11 @@ function KpiCard({
         ) : (
           <div
             className={`mt-3 tabular font-display text-3xl font-bold ${
-              tone === "success" ? "text-success" : tone === "destructive" ? "text-foreground" : "text-gradient-primary"
+              tone === "success"
+                ? "text-success"
+                : tone === "destructive"
+                  ? "text-foreground"
+                  : "text-gradient-primary"
             }`}
           >
             {formatBRL(value)}

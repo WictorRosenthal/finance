@@ -1,5 +1,5 @@
 // filepath: backend/src/domain/repositories/IAccountRepository.ts
-import { Account } from '../entities/Account';
+import { Account } from "../entities/Account";
 
 export interface IAccountRepository {
   findById(userId: string, id: string): Promise<Account | null>;

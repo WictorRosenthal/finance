@@ -1,5 +1,5 @@
 // filepath: backend/src/domain/entities/Account.ts
-import { Money, AccountType } from '../value-objects';
+import { Money, AccountType } from "../value-objects";
 
 export interface AccountProps {
   id: string;
@@ -67,8 +67,8 @@ export class Account {
   }
 
   updateName(name: string): void {
-    if (!name || name.trim() === '') {
-      throw new Error('Name cannot be empty');
+    if (!name || name.trim() === "") {
+      throw new Error("Name cannot be empty");
     }
     this.props.name = name.trim();
     this.props.updatedAt = new Date();

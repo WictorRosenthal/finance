@@ -1,17 +1,20 @@
 // filepath: backend/src/infrastructure/orm/repositories/DrizzleAccountRepository.ts
-import { inject, injectable } from 'tsyringe';
-import { and, eq } from 'drizzle-orm';
-import { IAccountRepository } from '../../../domain/repositories/IAccountRepository.js';
-import { Account, AccountProps } from '../../../domain/entities/Account.js';
-import { Money } from '../../../domain/value-objects/Money.js';
-import { AccountType } from '../../../domain/value-objects/AccountType.js';
-import { db } from '../../database/connection.js';
-import { accounts, AccountDb } from '../schema.js';
+import { inject, injectable } from "tsyringe";
+import { and, eq } from "drizzle-orm";
+import { IAccountRepository } from "../../../domain/repositories/IAccountRepository.js";
+import { Account, AccountProps } from "../../../domain/entities/Account.js";
+import { Money } from "../../../domain/value-objects/Money.js";
+import { AccountType } from "../../../domain/value-objects/AccountType.js";
+import { db } from "../../database/connection.js";
+import { accounts, AccountDb } from "../schema.js";
 
 @injectable()
 export class DrizzleAccountRepository implements IAccountRepository {
   async findById(userId: string, id: string): Promise<Account | null> {
-    const result = await db.select().from(accounts).where(and(eq(accounts.id, id), eq(accounts.userId, userId)));
+    const result = await db
+      .select()
+      .from(accounts)
+      .where(and(eq(accounts.id, id), eq(accounts.userId, userId)));
     return result[0] ? this.mapToEntity(result[0]) : null;
   }
 
@@ -21,24 +24,30 @@ export class DrizzleAccountRepository implements IAccountRepository {
   }
 
   async findActive(userId: string): Promise<Account[]> {
-    const result = await db.select().from(accounts).where(and(eq(accounts.userId, userId), eq(accounts.isActive, true)));
+    const result = await db
+      .select()
+      .from(accounts)
+      .where(and(eq(accounts.userId, userId), eq(accounts.isActive, true)));
     return result.map(this.mapToEntity);
   }
 
   async save(account: Account): Promise<Account> {
     const data = this.mapToDb(account);
-    const [saved] = await db.insert(accounts).values({
-      id: account.id,
-      userId: account.userId,
-      name: account.name,
-      type: account.type,
-      balance: account.balance.amount.toFixed(2),
-      color: account.color,
-      icon: account.icon,
-      isActive: account.isActive,
-      createdAt: account.createdAt,
-      updatedAt: account.updatedAt
-    }).returning();
+    const [saved] = await db
+      .insert(accounts)
+      .values({
+        id: account.id,
+        userId: account.userId,
+        name: account.name,
+        type: account.type,
+        balance: account.balance.amount.toFixed(2),
+        color: account.color,
+        icon: account.icon,
+        isActive: account.isActive,
+        createdAt: account.createdAt,
+        updatedAt: account.updatedAt,
+      })
+      .returning();
 
     return this.mapToEntity(saved);
   }
@@ -63,12 +72,12 @@ export class DrizzleAccountRepository implements IAccountRepository {
       userId: dbRecord.userId,
       name: dbRecord.name,
       type: dbRecord.type as AccountType,
-      balance: new Money(parseFloat(dbRecord.balance), 'BRL'),
+      balance: new Money(parseFloat(dbRecord.balance), "BRL"),
       color: dbRecord.color,
       icon: dbRecord.icon,
       isActive: dbRecord.isActive,
       createdAt: new Date(dbRecord.createdAt),
-      updatedAt: new Date(dbRecord.updatedAt)
+      updatedAt: new Date(dbRecord.updatedAt),
     };
     return new Account(props);
   }
@@ -84,7 +93,7 @@ export class DrizzleAccountRepository implements IAccountRepository {
       icon: account.icon,
       isActive: account.isActive,
       createdAt: account.createdAt,
-      updatedAt: account.updatedAt
+      updatedAt: account.updatedAt,
     };
   }
 }

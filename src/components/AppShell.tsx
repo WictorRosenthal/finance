@@ -1,12 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import {
-  LayoutDashboard,
-  ArrowLeftRight,
-  Wallet,
-  Tag,
-  LogOut,
-  User,
-} from "lucide-react";
+import { LayoutDashboard, ArrowLeftRight, Wallet, Tag, LogOut, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -92,9 +85,7 @@ function UserMenu() {
           ) : (
             <>
               <span className="font-medium">{user?.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {user?.email}
-              </span>
+              <span className="text-xs text-muted-foreground">{user?.email}</span>
             </>
           )}
         </DropdownMenuLabel>
@@ -139,9 +130,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {/* LOGO */}
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="relative h-9 w-9 rounded-xl bg-gradient-primary shadow-glow-primary flex items-center justify-center">
-              <span className="font-display font-bold text-primary-foreground text-lg">
-                F
-              </span>
+              <span className="font-display font-bold text-primary-foreground text-lg">F</span>
             </div>
             <div className="leading-tight">
               <div className="font-display font-bold text-lg tracking-tight">
@@ -166,7 +155,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     "px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors",
                     active
                       ? "bg-primary text-primary-foreground shadow-glow-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -195,7 +184,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   "shrink-0 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5",
                   active
                     ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground bg-card/60 border border-border/50"
+                    : "text-muted-foreground bg-card/60 border border-border/50",
                 )}
               >
                 <Icon className="h-3 w-3" />

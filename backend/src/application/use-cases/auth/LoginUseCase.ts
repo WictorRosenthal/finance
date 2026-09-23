@@ -1,20 +1,24 @@
-import { IUserRepository } from '../../../domain/repositories/IUserRepository';
-import { JwtService } from '../../../infrastructure/auth/JwtService';
-import { LoginMapper } from '../../mappers/LoginMapper';
-import bcrypt from 'bcrypt';
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { JwtService } from "../../../infrastructure/auth/JwtService";
+import { LoginMapper } from "../../mappers/LoginMapper";
+import { UnauthorizedError } from "../../../shared/errors/AppError";
+import bcrypt from "bcrypt";
 export class LoginUseCase {
   constructor(
     private userRepository: IUserRepository,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async execute(email: string, password: string): Promise<string> {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new Error('Invalid credentials');
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await this.userRepository.findByEmail(normalizedEmail);
+    if (!user) throw new UnauthorizedError("Email ou senha inválidos");
 
     const userDTO = LoginMapper.toDTO(user);
-    const isPasswordValid = await bcrypt.compare(password, userDTO.passwordHash);
-    if (!isPasswordValid) throw new Error('Invalid credentials');
+    const isPasswordValid = userDTO.passwordHash
+      ? await bcrypt.compare(password, userDTO.passwordHash)
+      : false;
+    if (!isPasswordValid) throw new UnauthorizedError("Email ou senha inválidos");
 
     return this.jwtService.generateToken({ userId: userDTO.id });
   }

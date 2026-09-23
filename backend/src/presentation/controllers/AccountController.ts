@@ -1,13 +1,13 @@
 // filepath: backend/src/presentation/controllers/AccountController.ts
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { container } from '../../infrastructure/container/Container';
-import { CreateAccountUseCase } from '../../application/use-cases/accounts/CreateAccountUseCase';
-import { GetAccountsUseCase } from '../../application/use-cases/accounts/GetAccountsUseCase';
-import { GetAccountByIdUseCase } from '../../application/use-cases/accounts/GetAccountByIdUseCase';
-import { UpdateAccountUseCase } from '../../application/use-cases/accounts/UpdateAccountUseCase';
-import { DeleteAccountUseCase } from '../../application/use-cases/accounts/DeleteAccountUseCase';
-import { CreateAccountDTO, UpdateAccountDTO } from '../../application/dto/AccountDTO';
-import { getAuthenticatedUserId } from '../middleware/authMiddleware';
+import { FastifyRequest, FastifyReply } from "fastify";
+import { container } from "../../infrastructure/container/Container";
+import { CreateAccountUseCase } from "../../application/use-cases/accounts/CreateAccountUseCase";
+import { GetAccountsUseCase } from "../../application/use-cases/accounts/GetAccountsUseCase";
+import { GetAccountByIdUseCase } from "../../application/use-cases/accounts/GetAccountByIdUseCase";
+import { UpdateAccountUseCase } from "../../application/use-cases/accounts/UpdateAccountUseCase";
+import { DeleteAccountUseCase } from "../../application/use-cases/accounts/DeleteAccountUseCase";
+import { CreateAccountDTO, UpdateAccountDTO } from "../../application/dto/AccountDTO";
+import { getAuthenticatedUserId } from "../middleware/authMiddleware";
 
 export class AccountController {
   async create(request: FastifyRequest, reply: FastifyReply) {
@@ -19,7 +19,7 @@ export class AccountController {
 
   async getAll(request: FastifyRequest, reply: FastifyReply) {
     const useCase = container.resolve(GetAccountsUseCase);
-    const includeInactive = (request.query as Record<string, unknown>)?.includeInactive === 'true';
+    const includeInactive = (request.query as Record<string, unknown>)?.includeInactive === "true";
     const result = await useCase.execute(getAuthenticatedUserId(request), includeInactive);
     return reply.send(result);
   }

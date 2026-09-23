@@ -1,4 +1,4 @@
-import { Money } from '../value-objects';
+import { Money } from "../value-objects";
 
 export interface AgreementProps {
   id: string;
@@ -57,8 +57,8 @@ export class Agreement {
   }
 
   updateName(name: string): void {
-    if (!name || name.trim() === '') {
-      throw new Error('Name cannot be empty');
+    if (!name || name.trim() === "") {
+      throw new Error("Name cannot be empty");
     }
 
     this.props.name = name.trim();

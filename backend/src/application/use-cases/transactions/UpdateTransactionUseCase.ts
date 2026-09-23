@@ -1,28 +1,28 @@
 // filepath: backend/src/application/use-cases/transactions/UpdateTransactionUseCase.ts
-import { inject, injectable } from 'tsyringe';
-import { ITransactionRepository } from '../../../domain/repositories/ITransactionRepository';
-import { IAgreementRepository } from '../../../domain/repositories/IAgreementRepository';
-import { TransactionAggregate } from '../../../domain/aggregates/TransactionAggregate';
-import { TransactionMapper } from '../../mappers/TransactionMapper';
-import { UpdateTransactionDTO, TransactionDTO } from '../../dto/TransactionDTO';
-import { NotFoundError, ValidationError } from '../../../shared/errors';
-import { TransactionType } from '../../../domain/value-objects';
-import { Money } from '../../../domain/value-objects';
+import { inject, injectable } from "tsyringe";
+import { ITransactionRepository } from "../../../domain/repositories/ITransactionRepository";
+import { IAgreementRepository } from "../../../domain/repositories/IAgreementRepository";
+import { TransactionAggregate } from "../../../domain/aggregates/TransactionAggregate";
+import { TransactionMapper } from "../../mappers/TransactionMapper";
+import { UpdateTransactionDTO, TransactionDTO } from "../../dto/TransactionDTO";
+import { NotFoundError, ValidationError } from "../../../shared/errors";
+import { TransactionType } from "../../../domain/value-objects";
+import { Money } from "../../../domain/value-objects";
 
 @injectable()
 export class UpdateTransactionUseCase {
   constructor(
-    @inject('ITransactionRepository')
+    @inject("ITransactionRepository")
     private readonly transactionRepository: ITransactionRepository,
-    @inject('IAgreementRepository')
-    private readonly agreementRepository: IAgreementRepository
+    @inject("IAgreementRepository")
+    private readonly agreementRepository: IAgreementRepository,
   ) {}
 
   async execute(userId: string, id: string, dto: UpdateTransactionDTO): Promise<TransactionDTO> {
     const existingTransaction = await this.transactionRepository.findById(userId, id);
 
     if (!existingTransaction) {
-      throw new NotFoundError('Transaction', id);
+      throw new NotFoundError("Transaction", id);
     }
 
     const aggregate = TransactionAggregate.fromEntity(existingTransaction);
@@ -50,8 +50,8 @@ export class UpdateTransactionUseCase {
       updateProps.category = dto.category;
     }
     if (dto.agreementId !== undefined) {
-      if (dto.agreementId && !await this.agreementRepository.findById(userId, dto.agreementId)) {
-        throw new NotFoundError('Agreement', dto.agreementId);
+      if (dto.agreementId && !(await this.agreementRepository.findById(userId, dto.agreementId))) {
+        throw new NotFoundError("Agreement", dto.agreementId);
       }
       updateProps.agreementId = dto.agreementId;
     }
@@ -65,9 +65,7 @@ export class UpdateTransactionUseCase {
 
     aggregate.update(updateProps);
 
-    const updatedTransaction = await this.transactionRepository.update(
-      aggregate.getTransaction()
-    );
+    const updatedTransaction = await this.transactionRepository.update(aggregate.getTransaction());
 
     return TransactionMapper.toDTO(updatedTransaction);
   }

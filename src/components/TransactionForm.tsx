@@ -13,16 +13,30 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 import {
-  CATEGORIES, PAYMENT_METHODS, applyDiscount, fallsInNextPayroll,
-  formatBRL, todayISO,
+  CATEGORIES,
+  PAYMENT_METHODS,
+  applyDiscount,
+  fallsInNextPayroll,
+  formatBRL,
+  todayISO,
 } from "@/lib/finance";
 
 type Account = { id: string; name: string; bank: string | null };
-type Convenio = { id: string; name: string; discount_percent: number; cutoff_day: number; active: boolean };
+type Convenio = {
+  id: string;
+  name: string;
+  discount_percent: number;
+  cutoff_day: number;
+  active: boolean;
+};
 type AgreementDTO = { id: string; name: string; monthlyFee: number | null; isActive: boolean };
 type TransactionApiDTO = {
   id: string;
@@ -90,11 +104,21 @@ function addInterval(isoDate: string, freq: Frequency, n: number): string {
   const [y, m, d] = isoDate.split("-").map(Number);
   const date = new Date(y, m - 1, d);
   switch (freq) {
-    case "weekly": date.setDate(date.getDate() + 7 * n); break;
-    case "biweekly": date.setDate(date.getDate() + 14 * n); break;
-    case "monthly": date.setMonth(date.getMonth() + n); break;
-    case "bimonthly": date.setMonth(date.getMonth() + 2 * n); break;
-    case "yearly": date.setFullYear(date.getFullYear() + n); break;
+    case "weekly":
+      date.setDate(date.getDate() + 7 * n);
+      break;
+    case "biweekly":
+      date.setDate(date.getDate() + 14 * n);
+      break;
+    case "monthly":
+      date.setMonth(date.getMonth() + n);
+      break;
+    case "bimonthly":
+      date.setMonth(date.getMonth() + 2 * n);
+      break;
+    case "yearly":
+      date.setFullYear(date.getFullYear() + n);
+      break;
   }
   const yy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, "0");
@@ -146,11 +170,13 @@ export function TransactionForm({ id }: { id?: string }) {
         api<AgreementDTO[]>("/api/agreements?includeInactive=true"),
       ]);
 
-      setAccounts((accountsRes ?? []).map((account) => ({
-        id: account.id,
-        name: account.name,
-        bank: null,
-      })));
+      setAccounts(
+        (accountsRes ?? []).map((account) => ({
+          id: account.id,
+          name: account.name,
+          bank: null,
+        })),
+      );
 
       setConvenios(
         (agreementsRes ?? [])
@@ -206,7 +232,8 @@ export function TransactionForm({ id }: { id?: string }) {
   const conv = convenios.find((c) => c.id === values.convenio_id);
   const finalAmount = conv ? applyDiscount(amountNum, Number(conv.discount_percent)) : amountNum;
   const willBeNextPayroll =
-    !!conv && fallsInNextPayroll(values.payment_date || null, values.due_date || null, conv.cutoff_day);
+    !!conv &&
+    fallsInNextPayroll(values.payment_date || null, values.due_date || null, conv.cutoff_day);
 
   // Preview de ocorrências (apenas para nova + recorrente)
   const recurringDates =
@@ -226,7 +253,9 @@ export function TransactionForm({ id }: { id?: string }) {
     if (!values.description.trim()) return toast.error("Descrição obrigatória");
     if (!values.category) return toast.error("Categoria obrigatória");
     if (values.payment_date && values.due_date && values.payment_date < values.due_date) {
-      const ok = window.confirm("Data de pagamento é anterior à data de vencimento. Confirmar mesmo assim?");
+      const ok = window.confirm(
+        "Data de pagamento é anterior à data de vencimento. Confirmar mesmo assim?",
+      );
       if (!ok) return;
     }
 
@@ -239,7 +268,8 @@ export function TransactionForm({ id }: { id?: string }) {
         if (n > 120) return toast.error("Máximo de 120 ocorrências");
       } else {
         if (!values.end_date) return toast.error("Informe a data final da recorrência");
-        if (values.end_date < values.due_date) return toast.error("Data final deve ser após o vencimento inicial");
+        if (values.end_date < values.due_date)
+          return toast.error("Data final deve ser após o vencimento inicial");
       }
       if (recurringDates.length === 0) return toast.error("Nenhuma ocorrência foi gerada");
     }
@@ -325,15 +355,25 @@ export function TransactionForm({ id }: { id?: string }) {
   }
 
   if (loading) {
-    return <AppShell><div className="text-muted-foreground">Carregando...</div></AppShell>;
+    return (
+      <AppShell>
+        <div className="text-muted-foreground">Carregando...</div>
+      </AppShell>
+    );
   }
 
   return (
     <AppShell>
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-3xl mx-auto space-y-6"
+      >
         <div>
           <Button variant="ghost" size="sm" asChild className="mb-3 -ml-3">
-            <Link to="/transacoes"><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Voltar</Link>
+            <Link to="/transacoes">
+              <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Voltar
+            </Link>
           </Button>
           <h1 className="font-display text-3xl md:text-4xl font-bold">
             {id ? "Editar movimentação" : "Nova movimentação"}
@@ -367,17 +407,29 @@ export function TransactionForm({ id }: { id?: string }) {
                 <div className="space-y-1.5">
                   <Label>Valor (R$) *</Label>
                   <Input
-                    type="number" step="0.01" min="0.01" inputMode="decimal"
-                    value={values.amount} onChange={(e) => set("amount", e.target.value)}
-                    placeholder="0,00" required className="bg-background/50 tabular text-lg"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    inputMode="decimal"
+                    value={values.amount}
+                    onChange={(e) => set("amount", e.target.value)}
+                    placeholder="0,00"
+                    required
+                    className="bg-background/50 tabular text-lg"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Categoria *</Label>
                   <Select value={values.category} onValueChange={(v) => set("category", v)}>
-                    <SelectTrigger className="bg-background/50"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      {CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -386,55 +438,94 @@ export function TransactionForm({ id }: { id?: string }) {
               <div className="space-y-1.5">
                 <Label>Descrição *</Label>
                 <Input
-                  value={values.description} onChange={(e) => set("description", e.target.value)}
-                  placeholder="Ex: Supermercado da semana" required className="bg-background/50"
+                  value={values.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  placeholder="Ex: Supermercado da semana"
+                  required
+                  className="bg-background/50"
                 />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Data de vencimento</Label>
-                  <Input type="date" value={values.due_date} onChange={(e) => set("due_date", e.target.value)} className="bg-background/50" />
+                  <Input
+                    type="date"
+                    value={values.due_date}
+                    onChange={(e) => set("due_date", e.target.value)}
+                    className="bg-background/50"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Data de pagamento</Label>
-                  <Input type="date" value={values.payment_date} onChange={(e) => set("payment_date", e.target.value)} className="bg-background/50" />
+                  <Input
+                    type="date"
+                    value={values.payment_date}
+                    onChange={(e) => set("payment_date", e.target.value)}
+                    className="bg-background/50"
+                  />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Forma de pagamento</Label>
-                  <Select value={values.payment_method} onValueChange={(v) => set("payment_method", v)}>
-                    <SelectTrigger className="bg-background/50"><SelectValue /></SelectTrigger>
+                  <Select
+                    value={values.payment_method}
+                    onValueChange={(v) => set("payment_method", v)}
+                  >
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m} className="capitalize">{m}</SelectItem>)}
+                      {PAYMENT_METHODS.map((m) => (
+                        <SelectItem key={m} value={m} className="capitalize">
+                          {m}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label>Conta</Label>
-                  <Select value={values.account_id || "none"} onValueChange={(v) => set("account_id", v === "none" ? "" : v)}>
-                    <SelectTrigger className="bg-background/50"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <Select
+                    value={values.account_id || "none"}
+                    onValueChange={(v) => set("account_id", v === "none" ? "" : v)}
+                  >
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">— Nenhuma —</SelectItem>
                       {accounts.map((a) => (
                         <SelectItem key={a.id} value={a.id}>
-                          {a.name}{a.bank ? ` · ${a.bank}` : ""}
+                          {a.name}
+                          {a.bank ? ` · ${a.bank}` : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   {accounts.length === 0 && (
-                    <p className="text-xs text-muted-foreground">Nenhuma conta. <Link to="/contas" className="text-primary underline">Criar uma</Link>.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Nenhuma conta.{" "}
+                      <Link to="/contas" className="text-primary underline">
+                        Criar uma
+                      </Link>
+                      .
+                    </p>
                   )}
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <Label>Convênio</Label>
-                <Select value={values.convenio_id || "none"} onValueChange={(v) => set("convenio_id", v === "none" ? "" : v)}>
-                  <SelectTrigger className="bg-background/50"><SelectValue placeholder="Sem convênio" /></SelectTrigger>
+                <Select
+                  value={values.convenio_id || "none"}
+                  onValueChange={(v) => set("convenio_id", v === "none" ? "" : v)}
+                >
+                  <SelectTrigger className="bg-background/50">
+                    <SelectValue placeholder="Sem convênio" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">— Sem convênio —</SelectItem>
                     {convenios.map((c) => (
@@ -445,14 +536,22 @@ export function TransactionForm({ id }: { id?: string }) {
                   </SelectContent>
                 </Select>
                 {convenios.length === 0 && (
-                  <p className="text-xs text-muted-foreground">Nenhum convênio. <Link to="/convenios" className="text-primary underline">Criar um</Link>.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Nenhum convênio.{" "}
+                    <Link to="/convenios" className="text-primary underline">
+                      Criar um
+                    </Link>
+                    .
+                  </p>
                 )}
               </div>
 
               {/* Preview de cálculo */}
               {(conv || amountNum > 0) && (
                 <div className="rounded-xl border border-border/50 bg-background/40 p-4 space-y-1.5">
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Preview</div>
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Preview
+                  </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Valor original</span>
                     <span className="tabular">{formatBRL(amountNum)}</span>
@@ -460,12 +559,18 @@ export function TransactionForm({ id }: { id?: string }) {
                   {conv && finalAmount !== amountNum && (
                     <>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Desconto ({conv.discount_percent}%)</span>
-                        <span className="tabular text-success">− {formatBRL(amountNum - finalAmount)}</span>
+                        <span className="text-muted-foreground">
+                          Desconto ({conv.discount_percent}%)
+                        </span>
+                        <span className="tabular text-success">
+                          − {formatBRL(amountNum - finalAmount)}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between font-semibold pt-1 border-t border-border/40">
                         <span>Valor final</span>
-                        <span className="tabular text-gradient-primary">{formatBRL(finalAmount)}</span>
+                        <span className="tabular text-gradient-primary">
+                          {formatBRL(finalAmount)}
+                        </span>
                       </div>
                     </>
                   )}
@@ -482,8 +587,12 @@ export function TransactionForm({ id }: { id?: string }) {
                 <div className="rounded-xl border border-border/50 bg-background/40 p-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="recurring" className="cursor-pointer">Movimentação recorrente</Label>
-                      <p className="text-xs text-muted-foreground">Repete ao longo do tempo (ex: aluguel, assinatura)</p>
+                      <Label htmlFor="recurring" className="cursor-pointer">
+                        Movimentação recorrente
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Repete ao longo do tempo (ex: aluguel, assinatura)
+                      </p>
                     </div>
                     <Switch
                       id="recurring"
@@ -497,19 +606,31 @@ export function TransactionForm({ id }: { id?: string }) {
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                           <Label>Frequência</Label>
-                          <Select value={values.frequency} onValueChange={(v) => set("frequency", v as Frequency)}>
-                            <SelectTrigger className="bg-background/50"><SelectValue /></SelectTrigger>
+                          <Select
+                            value={values.frequency}
+                            onValueChange={(v) => set("frequency", v as Frequency)}
+                          >
+                            <SelectTrigger className="bg-background/50">
+                              <SelectValue />
+                            </SelectTrigger>
                             <SelectContent>
                               {(Object.keys(FREQUENCY_LABELS) as Frequency[]).map((f) => (
-                                <SelectItem key={f} value={f}>{FREQUENCY_LABELS[f]}</SelectItem>
+                                <SelectItem key={f} value={f}>
+                                  {FREQUENCY_LABELS[f]}
+                                </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1.5">
                           <Label>Repetir até</Label>
-                          <Select value={values.end_mode} onValueChange={(v) => set("end_mode", v as EndMode)}>
-                            <SelectTrigger className="bg-background/50"><SelectValue /></SelectTrigger>
+                          <Select
+                            value={values.end_mode}
+                            onValueChange={(v) => set("end_mode", v as EndMode)}
+                          >
+                            <SelectTrigger className="bg-background/50">
+                              <SelectValue />
+                            </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="count">Número de ocorrências</SelectItem>
                               <SelectItem value="until">Data final</SelectItem>
@@ -522,12 +643,17 @@ export function TransactionForm({ id }: { id?: string }) {
                         <div className="space-y-1.5">
                           <Label>Número de ocorrências</Label>
                           <Input
-                            type="number" min="1" max="120" step="1"
+                            type="number"
+                            min="1"
+                            max="120"
+                            step="1"
                             value={values.occurrences}
                             onChange={(e) => set("occurrences", e.target.value)}
                             className="bg-background/50 tabular"
                           />
-                          <p className="text-xs text-muted-foreground">Inclui a primeira. Máximo 120.</p>
+                          <p className="text-xs text-muted-foreground">
+                            Inclui a primeira. Máximo 120.
+                          </p>
                         </div>
                       ) : (
                         <div className="space-y-1.5">
@@ -551,12 +677,22 @@ export function TransactionForm({ id }: { id?: string }) {
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>Primeira: {recurringDates[0].split("-").reverse().join("/")}</span>
-                            <span>Última: {recurringDates[recurringDates.length - 1].split("-").reverse().join("/")}</span>
+                            <span>
+                              Primeira: {recurringDates[0].split("-").reverse().join("/")}
+                            </span>
+                            <span>
+                              Última:{" "}
+                              {recurringDates[recurringDates.length - 1]
+                                .split("-")
+                                .reverse()
+                                .join("/")}
+                            </span>
                           </div>
                           <div className="flex items-center justify-between text-sm pt-1 border-t border-border/40 mt-2">
                             <span className="text-muted-foreground">Total</span>
-                            <span className="font-semibold tabular">{formatBRL(finalAmount * recurringDates.length)}</span>
+                            <span className="font-semibold tabular">
+                              {formatBRL(finalAmount * recurringDates.length)}
+                            </span>
                           </div>
                         </div>
                       )}
@@ -567,15 +703,28 @@ export function TransactionForm({ id }: { id?: string }) {
 
               <div className="flex items-center justify-between p-4 rounded-xl bg-background/40 border border-border/50">
                 <div>
-                  <Label htmlFor="paid" className="cursor-pointer">Já está pago?</Label>
-                  <p className="text-xs text-muted-foreground">Marque se a transação já foi quitada</p>
+                  <Label htmlFor="paid" className="cursor-pointer">
+                    Já está pago?
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Marque se a transação já foi quitada
+                  </p>
                 </div>
-                <Switch id="paid" checked={values.is_paid} onCheckedChange={(v) => set("is_paid", v)} />
+                <Switch
+                  id="paid"
+                  checked={values.is_paid}
+                  onCheckedChange={(v) => set("is_paid", v)}
+                />
               </div>
 
               <div className="space-y-1.5">
                 <Label>Observações</Label>
-                <Textarea value={values.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Opcional" className="bg-background/50 min-h-[80px]" />
+                <Textarea
+                  value={values.notes}
+                  onChange={(e) => set("notes", e.target.value)}
+                  placeholder="Opcional"
+                  className="bg-background/50 min-h-[80px]"
+                />
               </div>
 
               <div className="flex gap-2 pt-2">
@@ -583,7 +732,8 @@ export function TransactionForm({ id }: { id?: string }) {
                   <Link to="/transacoes">Cancelar</Link>
                 </Button>
                 <Button
-                  type="submit" disabled={saving}
+                  type="submit"
+                  disabled={saving}
                   className="flex-1 bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90"
                 >
                   <Save className="mr-1.5 h-4 w-4" />

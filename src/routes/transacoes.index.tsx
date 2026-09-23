@@ -2,7 +2,16 @@ import { api } from "@/lib/api";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowDownRight, ArrowUpRight, Pencil, Plus, Search, Trash2, Filter, Check } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  Filter,
+  Check,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
@@ -75,17 +84,9 @@ type TransactionApiDTO = {
 };
 
 function mapApiTx(tx: TransactionApiDTO & Record<string, any>): Tx {
-  const paymentDate =
-    tx.paymentDate ??
-    tx.payment_date ??
-    tx.paidAt ??
-    tx.paid_at ??
-    null;
+  const paymentDate = tx.paymentDate ?? tx.payment_date ?? tx.paidAt ?? tx.paid_at ?? null;
 
-  const paymentMethod =
-    tx.paymentMethod ??
-    tx.payment_method ??
-    null;
+  const paymentMethod = tx.paymentMethod ?? tx.payment_method ?? null;
 
   return {
     id: tx.id,
@@ -148,7 +149,7 @@ function TransactionsPage() {
     setLoading(true);
 
     const s = optionalStart ?? startDate; // 'YYYY-MM-DD'
-    const e = optionalEnd ?? endDate;     // 'YYYY-MM-DD'
+    const e = optionalEnd ?? endDate; // 'YYYY-MM-DD'
 
     try {
       // send local-day range: start at 00:00:00 local, end at 23:59:59 local
@@ -157,12 +158,16 @@ function TransactionsPage() {
       const endParam = `${e}T23:59:59${tz}`;
 
       const res = await api<{ data: TransactionApiDTO[] }>(
-        `/api/transactions?startDate=${encodeURIComponent(startParam)}&endDate=${encodeURIComponent(endParam)}&page=1&limit=1000`
+        `/api/transactions?startDate=${encodeURIComponent(startParam)}&endDate=${encodeURIComponent(endParam)}&page=1&limit=1000`,
       );
 
       const now = new Date(); // compute next_payroll relative to "today"
       const firstOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const firstOfMonthAfterNext = new Date(firstOfNextMonth.getFullYear(), firstOfNextMonth.getMonth() + 1, 1);
+      const firstOfMonthAfterNext = new Date(
+        firstOfNextMonth.getFullYear(),
+        firstOfNextMonth.getMonth() + 1,
+        1,
+      );
 
       const mapped = (res.data ?? []).map((tx) => {
         const m = mapApiTx(tx);
@@ -228,14 +233,14 @@ function TransactionsPage() {
         body: JSON.stringify({ paymentDate: iso }),
       });
 
-      const updated = res?.data ? mapApiTx(res.data as TransactionApiDTO & Record<string, any>) : null;
+      const updated = res?.data
+        ? mapApiTx(res.data as TransactionApiDTO & Record<string, any>)
+        : null;
 
       setItems((prev) =>
         prev.map((t) =>
-          t.id === id
-            ? updated ?? { ...t, is_paid: true, payment_date: iso }
-            : t
-        )
+          t.id === id ? (updated ?? { ...t, is_paid: true, payment_date: iso }) : t,
+        ),
       );
 
       toast.success("Movimentação marcada como paga");
@@ -267,7 +272,10 @@ function TransactionsPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Histórico</p>
             <h1 className="font-display text-4xl font-bold mt-1">Movimentações</h1>
           </div>
-          <Button asChild className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full">
+          <Button
+            asChild
+            className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full"
+          >
             <Link to="/transacoes/nova">
               <Plus className="mr-1.5 h-4 w-4" /> Nova
             </Link>
@@ -306,10 +314,15 @@ function TransactionsPage() {
               />
             </div>
 
-            <Button onClick={handleSearchByRange} className="h-9">Buscar</Button>
+            <Button onClick={handleSearchByRange} className="h-9">
+              Buscar
+            </Button>
 
             <Select value={type} onValueChange={setType}>
-              <SelectTrigger className="w-[140px] bg-background/50"><Filter className="h-3 w-3 mr-1" /><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[140px] bg-background/50">
+                <Filter className="h-3 w-3 mr-1" />
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="receita">Receitas</SelectItem>
@@ -318,17 +331,23 @@ function TransactionsPage() {
             </Select>
 
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-[180px] bg-background/50"><SelectValue placeholder="Categoria" /></SelectTrigger>
+              <SelectTrigger className="w-[180px] bg-background/50">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas categorias</SelectItem>
                 {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[170px] bg-background/50"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[170px] bg-background/50">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos status</SelectItem>
                 <SelectItem value="paid">Pagas</SelectItem>
@@ -342,16 +361,22 @@ function TransactionsPage() {
           <CardContent className="p-0">
             {loading ? (
               <div className="p-6 space-y-3">
-                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 w-full" />
+                ))}
               </div>
             ) : filtered.length === 0 ? (
               <div className="p-16 text-center">
                 <p className="text-sm text-muted-foreground">
-                  {items.length === 0 ? "Nenhuma movimentação ainda." : "Nenhum resultado para os filtros."}
+                  {items.length === 0
+                    ? "Nenhuma movimentação ainda."
+                    : "Nenhum resultado para os filtros."}
                 </p>
                 {items.length === 0 && (
                   <Button asChild variant="outline" className="mt-4 rounded-full">
-                    <Link to="/transacoes/nova"><Plus className="mr-1.5 h-4 w-4" /> Cadastrar primeira</Link>
+                    <Link to="/transacoes/nova">
+                      <Plus className="mr-1.5 h-4 w-4" /> Cadastrar primeira
+                    </Link>
                   </Button>
                 )}
               </div>
@@ -359,36 +384,70 @@ function TransactionsPage() {
               <ul className="divide-y divide-border/40">
                 {filtered.map((t) => {
                   const v = Number(t.final_amount ?? t.amount);
-                  const hasDiscount = t.final_amount !== null && Number(t.final_amount) !== Number(t.amount);
+                  const hasDiscount =
+                    t.final_amount !== null && Number(t.final_amount) !== Number(t.amount);
                   const isReceita = t.type === "receita";
                   return (
-                    <li key={t.id} className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors">
-                      <div className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${
-                        isReceita ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
-                      }`}>
-                        {isReceita ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                    <li
+                      key={t.id}
+                      className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors"
+                    >
+                      <div
+                        className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${
+                          isReceita
+                            ? "bg-success/15 text-success"
+                            : "bg-destructive/15 text-destructive"
+                        }`}
+                      >
+                        {isReceita ? (
+                          <ArrowUpRight className="h-4 w-4" />
+                        ) : (
+                          <ArrowDownRight className="h-4 w-4" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium truncate">{t.description}</span>
                           {t.is_paid ? (
-                            <Badge variant="outline" className="text-[10px] py-0 h-4 border-success/40 text-success">pago</Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] py-0 h-4 border-success/40 text-success"
+                            >
+                              pago
+                            </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-[10px] py-0 h-4 border-warning/40 text-warning">pendente</Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] py-0 h-4 border-warning/40 text-warning"
+                            >
+                              pendente
+                            </Badge>
                           )}
                           {t.next_payroll && (
-                            <Badge variant="outline" className="text-[10px] py-0 h-4 border-accent/40 text-accent">próxima folha</Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] py-0 h-4 border-accent/40 text-accent"
+                            >
+                              próxima folha
+                            </Badge>
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
                           <span>{t.category}</span>
                           <span>·</span>
                           <span>venc {formatDateBR(t.due_date)}</span>
-                          {t.payment_method && <><span>·</span><span>{t.payment_method}</span></>}
+                          {t.payment_method && (
+                            <>
+                              <span>·</span>
+                              <span>{t.payment_method}</span>
+                            </>
+                          )}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className={`tabular font-semibold ${isReceita ? "text-success" : "text-foreground"}`}>
+                        <div
+                          className={`tabular font-semibold ${isReceita ? "text-success" : "text-foreground"}`}
+                        >
                           {isReceita ? "+" : "−"} {formatBRL(v)}
                         </div>
                         {hasDiscount && (
@@ -414,7 +473,12 @@ function TransactionsPage() {
                             <Pencil className="h-3.5 w-3.5" />
                           </Link>
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setToDelete(t)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => setToDelete(t)}
+                        >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -434,7 +498,9 @@ function TransactionsPage() {
             <AlertDialogDescription>
               {toDelete && (
                 <>
-                  <strong>{toDelete.description}</strong> — {formatBRL(Number(toDelete.final_amount ?? toDelete.amount))}<br />
+                  <strong>{toDelete.description}</strong> —{" "}
+                  {formatBRL(Number(toDelete.final_amount ?? toDelete.amount))}
+                  <br />
                   Esta ação não pode ser desfeita.
                 </>
               )}
@@ -442,7 +508,10 @@ function TransactionsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>

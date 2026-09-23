@@ -1,6 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
-import { Transaction } from '../entities/Transaction';
-import { Money, TransactionType } from '../value-objects';
+import { v4 as uuidv4 } from "uuid";
+import { Transaction } from "../entities/Transaction";
+import { Money, TransactionType } from "../value-objects";
 
 export interface CreateTransactionProps {
   userId: string;
@@ -11,7 +11,7 @@ export interface CreateTransactionProps {
   accountId: string;
   agreementId?: string;
   date: Date;
-  paymentDate?: Date | null; 
+  paymentDate?: Date | null;
 }
 
 export interface UpdateTransactionProps {
@@ -32,20 +32,20 @@ export class TransactionAggregate {
   }
 
   static create(props: CreateTransactionProps): TransactionAggregate {
-    if (!props.description || props.description.trim() === '') {
-      throw new Error('Description is required');
+    if (!props.description || props.description.trim() === "") {
+      throw new Error("Description is required");
     }
     if (props.amount <= 0) {
-      throw new Error('Amount must be positive');
+      throw new Error("Amount must be positive");
     }
-    if (!props.category || props.category.trim() === '') {
-      throw new Error('Category is required');
+    if (!props.category || props.category.trim() === "") {
+      throw new Error("Category is required");
     }
     if (!props.accountId) {
-      throw new Error('Account ID is required');
+      throw new Error("Account ID is required");
     }
     if (!Object.values(TransactionType).includes(props.type)) {
-      throw new Error('Invalid transaction type');
+      throw new Error("Invalid transaction type");
     }
 
     const now = new Date();
@@ -61,7 +61,7 @@ export class TransactionAggregate {
       date: props.date,
       paymentDate: props.paymentDate,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     const transaction = new Transaction(transactionProps);
@@ -87,9 +87,12 @@ export class TransactionAggregate {
       this.transaction.updateCategory(props.category);
     }
     if (props.paymentDate !== undefined) {
-      if (typeof (this.transaction as any).updatePaymentDate === 'function') {
+      if (typeof (this.transaction as any).updatePaymentDate === "function") {
         (this.transaction as any).updatePaymentDate(props.paymentDate);
-      } else if (typeof (this.transaction as any).clearPaymentDate === 'function' && props.paymentDate === null) {
+      } else if (
+        typeof (this.transaction as any).clearPaymentDate === "function" &&
+        props.paymentDate === null
+      ) {
         (this.transaction as any).clearPaymentDate();
       } else {
         (this.transaction as any).paymentDate = props.paymentDate;
@@ -99,13 +102,13 @@ export class TransactionAggregate {
 
   applyDiscount(discountAmount: number): void {
     if (this.transaction.type === TransactionType.INCOME) {
-      throw new Error('Cannot apply discount to income transactions');
+      throw new Error("Cannot apply discount to income transactions");
     }
     if (discountAmount <= 0) {
-      throw new Error('Discount amount must be positive');
+      throw new Error("Discount amount must be positive");
     }
     if (discountAmount >= this.transaction.amount.amount) {
-      throw new Error('Discount cannot be greater than or equal to transaction amount');
+      throw new Error("Discount cannot be greater than or equal to transaction amount");
     }
 
     const currentAmount = this.transaction.amount.amount;

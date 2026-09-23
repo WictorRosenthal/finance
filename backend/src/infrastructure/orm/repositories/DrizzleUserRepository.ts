@@ -1,8 +1,8 @@
-import { db } from '../../database/connection';
-import { users } from '../schema';
-import { eq, and } from 'drizzle-orm';
-import { IUserRepository } from '../../../domain/repositories/IUserRepository';
-import { User } from '../../../domain/entities/User';
+import { db } from "../../database/connection";
+import { users } from "../schema";
+import { eq, and } from "drizzle-orm";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository";
+import { User } from "../../../domain/entities/User";
 
 export class DrizzleUserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<User | null> {

@@ -14,7 +14,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/convenios")({
@@ -55,17 +60,24 @@ function ConveniosPage() {
   const [items, setItems] = useState<Convenio[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", discount_percent: "0", cutoff_day: "15", description: "" });
+  const [form, setForm] = useState({
+    name: "",
+    discount_percent: "0",
+    cutoff_day: "15",
+    description: "",
+  });
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   async function load() {
     setLoading(true);
     try {
-      const data = await api<AgreementDTO[]>('/api/agreements?includeInactive=true');
+      const data = await api<AgreementDTO[]>("/api/agreements?includeInactive=true");
       setItems((data ?? []).map(mapAgreementToConvenio));
     } catch (err: any) {
-      toast.error(err?.message || 'Erro ao carregar convênios');
+      toast.error(err?.message || "Erro ao carregar convênios");
     } finally {
       setLoading(false);
     }
@@ -79,11 +91,11 @@ function ConveniosPage() {
     if (cd < 1 || cd > 31) return toast.error("Dia de corte entre 1 e 31");
 
     try {
-      await api('/api/agreements', {
-        method: 'POST',
+      await api("/api/agreements", {
+        method: "POST",
         body: JSON.stringify({
           name: form.name.trim(),
-          category: form.description.trim() || 'Convênio',
+          category: form.description.trim() || "Convênio",
           monthlyFee: dp,
         }),
       });
@@ -93,20 +105,20 @@ function ConveniosPage() {
       setOpen(false);
       await load();
     } catch (err: any) {
-      toast.error(err?.message || 'Erro ao criar convênio');
+      toast.error(err?.message || "Erro ao criar convênio");
     }
   }
 
   async function toggleActive(c: Convenio) {
     try {
       await api(`/api/agreements/${c.id}`, {
-        method: 'PUT',
+        method: "PUT",
         body: JSON.stringify({ isActive: !c.active }),
       });
       toast.success(c.active ? "Convênio desativado" : "Convênio ativado");
       await load();
     } catch (err: any) {
-      toast.error(err?.message || 'Erro ao atualizar status');
+      toast.error(err?.message || "Erro ao atualizar status");
     }
   }
 
@@ -115,21 +127,27 @@ function ConveniosPage() {
 
     try {
       await api(`/api/agreements/${c.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       toast.success("Convênio removido");
       await load();
     } catch (err: any) {
-      toast.error(err?.message || 'Erro ao remover convênio');
+      toast.error(err?.message || "Erro ao remover convênio");
     }
   }
 
   return (
     <AppShell>
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Descontos & folha</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Descontos & folha
+            </p>
             <h1 className="font-display text-4xl font-bold mt-1">Convênios</h1>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -139,20 +157,41 @@ function ConveniosPage() {
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Novo convênio</DialogTitle></DialogHeader>
+              <DialogHeader>
+                <DialogTitle>Novo convênio</DialogTitle>
+              </DialogHeader>
               <div className="space-y-4 py-2">
                 <div className="space-y-1.5">
                   <Label>Nome *</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Conv. ABC Supermercado" />
+                  <Input
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="Conv. ABC Supermercado"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>Desconto (%)</Label>
-                    <Input type="number" step="0.5" min="0" max="100" value={form.discount_percent} onChange={(e) => setForm({ ...form, discount_percent: e.target.value })} className="tabular" />
+                    <Input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="100"
+                      value={form.discount_percent}
+                      onChange={(e) => setForm({ ...form, discount_percent: e.target.value })}
+                      className="tabular"
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Dia de corte</Label>
-                    <Input type="number" min="1" max="31" value={form.cutoff_day} onChange={(e) => setForm({ ...form, cutoff_day: e.target.value })} className="tabular" />
+                    <Input
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={form.cutoff_day}
+                      onChange={(e) => setForm({ ...form, cutoff_day: e.target.value })}
+                      className="tabular"
+                    />
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -160,12 +199,20 @@ function ConveniosPage() {
                 </p>
                 <div className="space-y-1.5">
                   <Label>Descrição</Label>
-                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Opcional" />
+                  <Textarea
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    placeholder="Opcional"
+                  />
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={create} className="bg-gradient-primary text-primary-foreground">Criar</Button>
+                <Button variant="outline" onClick={() => setOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={create} className="bg-gradient-primary text-primary-foreground">
+                  Criar
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -173,7 +220,9 @@ function ConveniosPage() {
 
         {loading ? (
           <div className="grid md:grid-cols-2 gap-4">
-            {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-36" />)}
+            {Array.from({ length: 2 }).map((_, i) => (
+              <Skeleton key={i} className="h-36" />
+            ))}
           </div>
         ) : items.length === 0 ? (
           <Card className="bg-gradient-card border-border/50 shadow-card">
@@ -184,7 +233,10 @@ function ConveniosPage() {
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {items.map((c) => (
-              <Card key={c.id} className={`bg-gradient-card border-border/50 shadow-card group ${!c.active ? "opacity-60" : ""}`}>
+              <Card
+                key={c.id}
+                className={`bg-gradient-card border-border/50 shadow-card group ${!c.active ? "opacity-60" : ""}`}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -194,31 +246,52 @@ function ConveniosPage() {
                       <div className="min-w-0">
                         <div className="font-display font-semibold text-lg flex items-center gap-2">
                           {c.name}
-                          {!c.active && <Badge variant="outline" className="text-[10px]">inativo</Badge>}
+                          {!c.active && (
+                            <Badge variant="outline" className="text-[10px]">
+                              inativo
+                            </Badge>
+                          )}
                         </div>
                         {c.description && (
-                          <div className="text-xs text-muted-foreground mt-0.5">{c.description}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {c.description}
+                          </div>
                         )}
                       </div>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleActive(c)} title={c.active ? "Desativar" : "Ativar"}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => toggleActive(c)}
+                        title={c.active ? "Desativar" : "Ativar"}
+                      >
                         <Power className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(c)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        onClick={() => remove(c)}
+                      >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     <div className="rounded-lg bg-background/40 border border-border/40 p-3">
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Desconto</div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Desconto
+                      </div>
                       <div className="tabular font-display text-2xl font-bold text-success mt-0.5">
                         {Number(c.discount_percent)}%
                       </div>
                     </div>
                     <div className="rounded-lg bg-background/40 border border-border/40 p-3">
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Dia de corte</div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Dia de corte
+                      </div>
                       <div className="tabular font-display text-2xl font-bold mt-0.5">
                         {c.cutoff_day}
                       </div>

@@ -1,7 +1,7 @@
-import { Transaction } from '../../domain/entities/Transaction';
-import { TransactionDTO, CreateTransactionDTO, TransactionFiltersDTO } from '../dto/TransactionDTO';
-import { TransactionType } from '../../domain/value-objects';
-import { TransactionFilters } from '../../domain/repositories/ITransactionRepository';
+import { Transaction } from "../../domain/entities/Transaction";
+import { TransactionDTO, CreateTransactionDTO, TransactionFiltersDTO } from "../dto/TransactionDTO";
+import { TransactionType } from "../../domain/value-objects";
+import { TransactionFilters } from "../../domain/repositories/ITransactionRepository";
 
 export class TransactionMapper {
   static toDTO(transaction: Transaction): TransactionDTO {
@@ -15,9 +15,11 @@ export class TransactionMapper {
       accountId: transaction.accountId,
       agreementId: transaction.agreementId,
       date: transaction.date.toISOString(),
-      paymentDate: (transaction as any).paymentDate ? (transaction as any).paymentDate.toISOString() : null, 
+      paymentDate: (transaction as any).paymentDate
+        ? (transaction as any).paymentDate.toISOString()
+        : null,
       createdAt: transaction.createdAt.toISOString(),
-      updatedAt: transaction.updatedAt.toISOString()
+      updatedAt: transaction.updatedAt.toISOString(),
     };
   }
 
@@ -33,7 +35,7 @@ export class TransactionMapper {
     accountId: string;
     agreementId?: string;
     date: Date;
-    paymentDate?: Date | null; 
+    paymentDate?: Date | null;
   } {
     return {
       description: dto.description,
@@ -47,8 +49,8 @@ export class TransactionMapper {
         dto.paymentDate === undefined
           ? undefined
           : dto.paymentDate === null
-          ? null
-          : new Date(dto.paymentDate),
+            ? null
+            : new Date(dto.paymentDate),
     };
   }
 
@@ -59,7 +61,7 @@ export class TransactionMapper {
       type: dto.type,
       category: dto.category,
       startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined
+      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
     };
   }
 }

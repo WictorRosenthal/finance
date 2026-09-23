@@ -10,18 +10,17 @@ export interface AgreementDTO {
   updatedAt: string;
 }
 
-
 export interface CreateAgreementDTO {
   name: string;
   category: string;
   monthlyFee?: number;
-  discountPercentage?: number; 
+  discountPercentage?: number;
 }
 
 export interface UpdateAgreementDTO {
   name?: string;
   category?: string;
   monthlyFee?: number;
-  discountPercentage?: number; 
+  discountPercentage?: number;
   isActive?: boolean;
 }

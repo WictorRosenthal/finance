@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'read-only';
+export type UserRole = "admin" | "read-only";
 
 export interface UserProps {
   id: string;
@@ -57,8 +57,8 @@ export class User {
   }
 
   updateName(name: string): void {
-    if (!name || name.trim() === '') {
-      throw new Error('Name cannot be empty');
+    if (!name || name.trim() === "") {
+      throw new Error("Name cannot be empty");
     }
     this.props.name = name.trim();
     this.touch();
@@ -66,7 +66,7 @@ export class User {
 
   updatePasswordHash(hashedPassword: string): void {
     if (!hashedPassword) {
-      throw new Error('Password hash cannot be empty');
+      throw new Error("Password hash cannot be empty");
     }
     this.props.passwordHash = hashedPassword;
     this.touch();
@@ -74,7 +74,7 @@ export class User {
 
   updateRole(role: UserRole): void {
     if (!role) {
-      throw new Error('Invalid role');
+      throw new Error("Invalid role");
     }
     this.props.role = role;
     this.touch();
@@ -85,25 +85,25 @@ export class User {
   }
 
   private validate(props: UserProps): void {
-    if (!props.email || props.email.trim() === '') {
-      throw new Error('Email is required');
+    if (!props.email || props.email.trim() === "") {
+      throw new Error("Email is required");
     }
-    if (!props.name || props.name.trim() === '') {
-      throw new Error('Name is required');
+    if (!props.name || props.name.trim() === "") {
+      throw new Error("Name is required");
     }
     if (!props.role) {
-      throw new Error('Role is required');
+      throw new Error("Role is required");
     }
     if (!props.createdAt) {
-      throw new Error('createdAt is required');
+      throw new Error("createdAt is required");
     }
     if (!props.updatedAt) {
-      throw new Error('updatedAt is required');
+      throw new Error("updatedAt is required");
     }
   }
 
   // Remove passwordHash (importante para API)
-  toSafeObject(): Omit<UserProps, 'passwordHash'> {
+  toSafeObject(): Omit<UserProps, "passwordHash"> {
     const { passwordHash, ...safe } = this.props;
     return safe;
   }

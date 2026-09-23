@@ -1,6 +1,6 @@
 // LoginMapper converte entre a entidade do banco (users) e a entidade de domínio (User)
-import { User } from '../../domain/entities/User';
-import { UserDTO } from '../dto/UserDTO';
+import { User } from "../../domain/entities/User";
+import { UserDTO } from "../dto/UserDTO";
 
 export class LoginMapper {
   static toDTO(user: User): UserDTO {
@@ -11,7 +11,7 @@ export class LoginMapper {
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      passwordHash: user.passwordHash ?? '',
+      passwordHash: user.passwordHash ?? "",
     };
   }
 
@@ -20,10 +20,9 @@ export class LoginMapper {
       id: userDTO.id,
       email: userDTO.email,
       name: userDTO.name,
-      role: userDTO.role as User['role'],
+      role: userDTO.role as User["role"],
       createdAt: userDTO.createdAt,
       updatedAt: userDTO.updatedAt,
     });
   }
 }
-

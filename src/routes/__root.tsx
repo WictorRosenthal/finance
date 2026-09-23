@@ -1,5 +1,13 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect } from "react";
+import {
+  Outlet,
+  Link,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
@@ -10,9 +18,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-display font-bold text-gradient-primary">404</h1>
         <h2 className="mt-4 text-xl font-semibold">Página não encontrada</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          A página que você procura não existe.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">A página que você procura não existe.</p>
         <div className="mt-6">
           <Link
             to="/"
@@ -32,14 +38,31 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "FinanceFlow — Controle financeiro pessoal" },
-      { name: "description", content: "Organize receitas, despesas, contas e convênios com clareza." },
+      {
+        name: "description",
+        content: "Organize receitas, despesas, contas e convênios com clareza.",
+      },
       { name: "theme-color", content: "#1f2024" },
       { property: "og:title", content: "FinanceFlow — Controle financeiro pessoal" },
       { name: "twitter:title", content: "FinanceFlow — Controle financeiro pessoal" },
-      { property: "og:description", content: "Organize receitas, despesas, contas e convênios com clareza." },
-      { name: "twitter:description", content: "Organize receitas, despesas, contas e convênios com clareza." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4c628a94-9029-44fb-915a-87983139e004/id-preview-14453e56--793059bf-ada7-4750-ac72-0d0ed919a1c4.lovable.app-1776707539534.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4c628a94-9029-44fb-915a-87983139e004/id-preview-14453e56--793059bf-ada7-4750-ac72-0d0ed919a1c4.lovable.app-1776707539534.png" },
+      {
+        property: "og:description",
+        content: "Organize receitas, despesas, contas e convênios com clareza.",
+      },
+      {
+        name: "twitter:description",
+        content: "Organize receitas, despesas, contas e convênios com clareza.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4c628a94-9029-44fb-915a-87983139e004/id-preview-14453e56--793059bf-ada7-4750-ac72-0d0ed919a1c4.lovable.app-1776707539534.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4c628a94-9029-44fb-915a-87983139e004/id-preview-14453e56--793059bf-ada7-4750-ac72-0d0ed919a1c4.lovable.app-1776707539534.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],
@@ -75,20 +98,31 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { location } = useRouterState();
   const navigate = useNavigate();
+  const currentPath = location.pathname;
+  const [authChecked, setAuthChecked] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
+  const needsLogin = authChecked && !hasToken && currentPath !== "/login";
+  const needsRedirectHome = authChecked && hasToken && currentPath === "/login";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const currentPath = location.pathname;
+    const hasStoredToken = Boolean(token);
+    setHasToken(hasStoredToken);
+    setAuthChecked(true);
 
-    if (!token && currentPath !== "/login") {
+    if (needsLogin) {
       navigate({ to: "/login", search: { redirect: currentPath }, replace: true });
       return;
     }
 
-    if (token && currentPath === "/login") {
+    if (needsRedirectHome) {
       navigate({ to: "/", replace: true });
     }
-  }, [location.pathname, navigate]);
+  }, [currentPath, navigate, needsLogin, needsRedirectHome]);
+
+  if (!authChecked || needsLogin || needsRedirectHome) {
+    return null;
+  }
 
   return (
     <>

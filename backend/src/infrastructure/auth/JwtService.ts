@@ -1,10 +1,10 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 export class JwtService {
-  private readonly secret = process.env.JWT_SECRET || 'changeme';
+  private readonly secret = process.env.JWT_SECRET || "changeme";
 
   generateToken(payload: object): string {
-    return jwt.sign(payload, this.secret, { expiresIn: '1h' });
+    return jwt.sign(payload, this.secret, { expiresIn: "1h" });
   }
 
   verifyToken(token: string): any {

@@ -1,22 +1,23 @@
 // filepath: backend/src/infrastructure/orm/repositories/DrizzleAgreementRepository.ts
-import { inject, injectable } from 'tsyringe';
-import { and, eq } from 'drizzle-orm';
-import { IAgreementRepository } from '../../../domain/repositories/IAgreementRepository';
-import { Agreement, AgreementProps } from '../../../domain/entities/Agreement';
-import { Money } from '../../../domain/value-objects';
-import { db } from '../../database/connection';
-import { agreements, AgreementDb } from '../schema';
-import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-
+import { inject, injectable } from "tsyringe";
+import { and, eq } from "drizzle-orm";
+import { IAgreementRepository } from "../../../domain/repositories/IAgreementRepository";
+import { Agreement, AgreementProps } from "../../../domain/entities/Agreement";
+import { Money } from "../../../domain/value-objects";
+import { db } from "../../database/connection";
+import { agreements, AgreementDb } from "../schema";
+import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 type AgreementInsert = InferInsertModel<typeof agreements>;
 type AgreementSelect = InferSelectModel<typeof agreements>;
 
-
 @injectable()
 export class DrizzleAgreementRepository implements IAgreementRepository {
   async findById(userId: string, id: string): Promise<Agreement | null> {
-    const result = await db.select().from(agreements).where(and(eq(agreements.id, id), eq(agreements.userId, userId)));
+    const result = await db
+      .select()
+      .from(agreements)
+      .where(and(eq(agreements.id, id), eq(agreements.userId, userId)));
     return result[0] ? this.mapToEntity(result[0]) : null;
   }
 
@@ -26,7 +27,10 @@ export class DrizzleAgreementRepository implements IAgreementRepository {
   }
 
   async findActive(userId: string): Promise<Agreement[]> {
-    const result = await db.select().from(agreements).where(and(eq(agreements.userId, userId), eq(agreements.isActive, true)));
+    const result = await db
+      .select()
+      .from(agreements)
+      .where(and(eq(agreements.userId, userId), eq(agreements.isActive, true)));
     return result.map(this.mapToEntity);
   }
 
@@ -56,15 +60,15 @@ export class DrizzleAgreementRepository implements IAgreementRepository {
       userId: dbRecord.userId,
       name: dbRecord.name,
       category: dbRecord.category,
-      monthlyFee: dbRecord.monthlyFee != null? new Money(Number(dbRecord.monthlyFee), 'BRL') : undefined,
+      monthlyFee:
+        dbRecord.monthlyFee != null ? new Money(Number(dbRecord.monthlyFee), "BRL") : undefined,
       isActive: dbRecord.isActive,
       createdAt: new Date(dbRecord.createdAt),
-      updatedAt: new Date(dbRecord.updatedAt)
+      updatedAt: new Date(dbRecord.updatedAt),
     };
     return new Agreement(props);
   }
 
-  
   private mapToDb(agreement: Agreement): AgreementInsert {
     return {
       id: agreement.id,
@@ -76,7 +80,7 @@ export class DrizzleAgreementRepository implements IAgreementRepository {
         : null,
       isActive: agreement.isActive,
       createdAt: agreement.createdAt,
-      updatedAt: agreement.updatedAt
+      updatedAt: agreement.updatedAt,
     };
   }
 }

@@ -1,21 +1,21 @@
-import 'reflect-metadata';
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-import { registerRoutes } from './presentation/routes/api.routes';
-import { errorHandler } from './presentation/middleware/errorHandler';
+import "reflect-metadata";
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import { registerRoutes } from "./presentation/routes/api.routes";
+import { errorHandler } from "./presentation/middleware/errorHandler";
 
-const PORT = parseInt(process.env.port || '3001');
-const HOST = process.env.host || '0.0.0.0';
+const PORT = parseInt(process.env.port || "3001");
+const HOST = process.env.host || "0.0.0.0";
 
 async function bootstrap() {
   const app = Fastify({
-    logger: true
+    logger: true,
   });
 
   // Register CORS
   await app.register(cors, {
     origin: true,
-    credentials: true
+    credentials: true,
   });
 
   // Register error handler

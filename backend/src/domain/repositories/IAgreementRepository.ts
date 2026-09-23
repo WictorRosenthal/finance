@@ -1,5 +1,5 @@
 // filepath: backend/src/domain/repositories/IAgreementRepository.ts
-import { Agreement } from '../entities/Agreement';
+import { Agreement } from "../entities/Agreement";
 
 export interface IAgreementRepository {
   findById(userId: string, id: string): Promise<Agreement | null>;

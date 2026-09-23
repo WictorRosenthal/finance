@@ -1,8 +1,8 @@
 // filepath: backend/src/domain/value-objects/TransactionType.ts
 export enum TransactionType {
-  INCOME = 'INCOME',
-  EXPENSE = 'EXPENSE',
-  TRANSFER = 'TRANSFER'
+  INCOME = "INCOME",
+  EXPENSE = "EXPENSE",
+  TRANSFER = "TRANSFER",
 }
 
 export function isTransactionType(value: string): value is TransactionType {

@@ -14,7 +14,7 @@ export interface AccountDTO {
 
 export interface CreateAccountDTO {
   name: string;
-  type: 'CHECKING' | 'SAVINGS' | 'CREDIT' | 'INVESTMENT';
+  type: "CHECKING" | "SAVINGS" | "CREDIT" | "INVESTMENT";
   balance?: number;
   color?: string;
   icon?: string;
@@ -22,7 +22,7 @@ export interface CreateAccountDTO {
 
 export interface UpdateAccountDTO {
   name?: string;
-  type?: 'CHECKING' | 'SAVINGS' | 'CREDIT' | 'INVESTMENT';
+  type?: "CHECKING" | "SAVINGS" | "CREDIT" | "INVESTMENT";
   balance?: number;
   color?: string;
   icon?: string;

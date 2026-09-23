@@ -1,4 +1,4 @@
-import { Money, TransactionType } from '../value-objects';
+import { Money, TransactionType } from "../value-objects";
 
 export interface TransactionProps {
   id: string;
@@ -14,7 +14,6 @@ export interface TransactionProps {
   createdAt: Date;
   updatedAt: Date;
 }
-
 
 export class Transaction {
   private readonly props: TransactionProps;
@@ -72,8 +71,8 @@ export class Transaction {
   }
 
   updateDescription(description: string): void {
-    if (!description || description.trim() === '') {
-      throw new Error('Description cannot be empty');
+    if (!description || description.trim() === "") {
+      throw new Error("Description cannot be empty");
     }
     this.props.description = description.trim();
     this.props.updatedAt = new Date();
@@ -97,7 +96,6 @@ export class Transaction {
     this.props.paymentDate = new Date();
     this.props.updatedAt = new Date();
   }
-
 
   toPlainObject(): TransactionProps {
     return { ...this.props };

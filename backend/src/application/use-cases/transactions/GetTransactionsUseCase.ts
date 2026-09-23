@@ -1,14 +1,18 @@
 // filepath: backend/src/application/use-cases/transactions/GetTransactionsUseCase.ts
-import { inject, injectable } from 'tsyringe';
-import { ITransactionRepository } from '../../../domain/repositories/ITransactionRepository';
-import { TransactionMapper } from '../../mappers/TransactionMapper';
-import { TransactionFiltersDTO, TransactionDTO, PaginatedTransactionsDTO } from '../../dto/TransactionDTO';
+import { inject, injectable } from "tsyringe";
+import { ITransactionRepository } from "../../../domain/repositories/ITransactionRepository";
+import { TransactionMapper } from "../../mappers/TransactionMapper";
+import {
+  TransactionFiltersDTO,
+  TransactionDTO,
+  PaginatedTransactionsDTO,
+} from "../../dto/TransactionDTO";
 
 @injectable()
 export class GetTransactionsUseCase {
   constructor(
-    @inject('ITransactionRepository')
-    private readonly transactionRepository: ITransactionRepository
+    @inject("ITransactionRepository")
+    private readonly transactionRepository: ITransactionRepository,
   ) {}
 
   async execute(userId: string, filters: TransactionFiltersDTO): Promise<PaginatedTransactionsDTO> {
@@ -25,7 +29,7 @@ export class GetTransactionsUseCase {
         ...domainFilters,
         // Adicionar suporte a paginação se necessário
       }),
-      this.transactionRepository.count(userId, domainFilters)
+      this.transactionRepository.count(userId, domainFilters),
     ]);
 
     return {
@@ -33,7 +37,7 @@ export class GetTransactionsUseCase {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     };
   }
 }

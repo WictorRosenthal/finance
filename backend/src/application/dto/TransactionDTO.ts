@@ -8,7 +8,7 @@ export interface TransactionDTO {
   accountId: string;
   agreementId?: string;
   date: string;
-  paymentDate?: string | null; 
+  paymentDate?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -16,18 +16,18 @@ export interface TransactionDTO {
 export interface CreateTransactionDTO {
   description: string;
   amount: number;
-  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
+  type: "INCOME" | "EXPENSE" | "TRANSFER";
   category: string;
   accountId: string;
   agreementId?: string;
   date: string;
-  paymentDate?: string | null; 
+  paymentDate?: string | null;
 }
 
 export interface UpdateTransactionDTO {
   description?: string;
   amount?: number;
-  type?: 'INCOME' | 'EXPENSE' | 'TRANSFER';
+  type?: "INCOME" | "EXPENSE" | "TRANSFER";
   category?: string;
   agreementId?: string;
   date?: string;
