@@ -10,12 +10,12 @@ export interface TransactionFilters {
 }
 
 export interface ITransactionRepository {
-  findById(id: string): Promise<Transaction | null>;
-  findAll(filters?: TransactionFilters): Promise<Transaction[]>;
-  findByAccountId(accountId: string): Promise<Transaction[]>;
-  findByDateRange(startDate: Date, endDate: Date): Promise<Transaction[]>;
+  findById(userId: string, id: string): Promise<Transaction | null>;
+  findAll(userId: string, filters?: TransactionFilters): Promise<Transaction[]>;
+  findByAccountId(userId: string, accountId: string): Promise<Transaction[]>;
+  findByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Transaction[]>;
   save(transaction: Transaction): Promise<Transaction>;
   update(transaction: Transaction): Promise<Transaction>;
-  delete(id: string): Promise<void>;
-  count(filters?: TransactionFilters): Promise<number>;
+  delete(userId: string, id: string): Promise<void>;
+  count(userId: string, filters?: TransactionFilters): Promise<number>;
 }

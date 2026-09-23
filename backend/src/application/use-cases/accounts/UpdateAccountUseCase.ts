@@ -14,8 +14,8 @@ export class UpdateAccountUseCase {
     private readonly accountRepository: IAccountRepository
   ) {}
 
-  async execute(id: string, dto: UpdateAccountDTO): Promise<AccountDTO> {
-    const existingAccount = await this.accountRepository.findById(id);
+  async execute(userId: string, id: string, dto: UpdateAccountDTO): Promise<AccountDTO> {
+    const existingAccount = await this.accountRepository.findById(userId, id);
 
     if (!existingAccount) {
       throw new NotFoundError('Account', id);

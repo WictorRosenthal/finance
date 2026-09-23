@@ -10,13 +10,13 @@ export class DeleteAgreementUseCase {
     private readonly agreementRepository: IAgreementRepository
   ) {}
 
-  async execute(id: string): Promise<void> {
-    const agreement = await this.agreementRepository.findById(id);
+  async execute(userId: string, id: string): Promise<void> {
+    const agreement = await this.agreementRepository.findById(userId, id);
 
     if (!agreement) {
       throw new NotFoundError('Agreement', id);
     }
 
-    await this.agreementRepository.delete(id);
+    await this.agreementRepository.delete(userId, id);
   }
 }

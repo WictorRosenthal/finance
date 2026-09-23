@@ -3,6 +3,7 @@ import { Money, AccountType } from '../value-objects';
 
 export interface AccountProps {
   id: string;
+  userId: string;
   name: string;
   type: AccountType;
   balance: Money;
@@ -15,8 +16,6 @@ export interface AccountProps {
 
 export class Account {
   private readonly props: AccountProps;
-  userId: any;
-  bank: any;
 
   constructor(props: AccountProps) {
     this.props = props;
@@ -24,6 +23,10 @@ export class Account {
 
   get id(): string {
     return this.props.id;
+  }
+
+  get userId(): string {
+    return this.props.userId;
   }
 
   get name(): string {

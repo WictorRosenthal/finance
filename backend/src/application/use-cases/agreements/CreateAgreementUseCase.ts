@@ -14,13 +14,14 @@ export class CreateAgreementUseCase {
     private readonly agreementRepository: IAgreementRepository
   ) {}
 
-  async execute(dto: CreateAgreementDTO): Promise<AgreementDTO> {
+  async execute(userId: string, dto: CreateAgreementDTO): Promise<AgreementDTO> {
     const props = AgreementMapper.toCreateProps(dto);
 
     const now = new Date();
 
     const agreementProps: AgreementProps = {
       id: uuidv4(),
+      userId,
       name: props.name,
       category: props.category,
       monthlyFee: props.monthlyFee

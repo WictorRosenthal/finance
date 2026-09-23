@@ -7,8 +7,8 @@ export class MarkTransactionAsPaidUseCase {
   private transactionRepository: ITransactionRepository
   ) {}
 
-  async execute(id: string) {
-    const transaction = await this.transactionRepository.findById(id);
+  async execute(userId: string, id: string) {
+    const transaction = await this.transactionRepository.findById(userId, id);
 
     if (!transaction) {
       throw new Error('Transaction not found');

@@ -13,9 +13,9 @@ export class CreateTransactionUseCase {
     private readonly transactionRepository: ITransactionRepository
   ) {}
 
-  async execute(dto: CreateTransactionDTO): Promise<TransactionDTO> {
+  async execute(userId: string, dto: CreateTransactionDTO): Promise<TransactionDTO> {
     // Converter DTO para props do domínio
-    const props = TransactionMapper.toCreateProps(dto);
+    const props = { ...TransactionMapper.toCreateProps(dto), userId };
 
     // Criar aggregate (valida regras de domínio)
     const aggregate = TransactionAggregate.create(props);

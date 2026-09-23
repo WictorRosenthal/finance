@@ -1,6 +1,6 @@
 // filepath: backend/src/infrastructure/orm/repositories/DrizzleAccountRepository.ts
 import { inject, injectable } from 'tsyringe';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { IAccountRepository } from '../../../domain/repositories/IAccountRepository.js';
 import { Account, AccountProps } from '../../../domain/entities/Account.js';
 import { Money } from '../../../domain/value-objects/Money.js';
@@ -10,18 +10,18 @@ import { accounts, AccountDb } from '../schema.js';
 
 @injectable()
 export class DrizzleAccountRepository implements IAccountRepository {
-  async findById(id: string): Promise<Account | null> {
-    const result = await db.select().from(accounts).where(eq(accounts.id, id));
+  async findById(userId: string, id: string): Promise<Account | null> {
+    const result = await db.select().from(accounts).where(and(eq(accounts.id, id), eq(accounts.userId, userId)));
     return result[0] ? this.mapToEntity(result[0]) : null;
   }
 
-  async findAll(): Promise<Account[]> {
-    const result = await db.select().from(accounts);
+  async findAll(userId: string): Promise<Account[]> {
+    const result = await db.select().from(accounts).where(eq(accounts.userId, userId));
     return result.map(this.mapToEntity);
   }
 
-  async findActive(): Promise<Account[]> {
-    const result = await db.select().from(accounts).where(eq(accounts.isActive, true));
+  async findActive(userId: string): Promise<Account[]> {
+    const result = await db.select().from(accounts).where(and(eq(accounts.userId, userId), eq(accounts.isActive, true)));
     return result.map(this.mapToEntity);
   }
 
@@ -29,6 +29,7 @@ export class DrizzleAccountRepository implements IAccountRepository {
     const data = this.mapToDb(account);
     const [saved] = await db.insert(accounts).values({
       id: account.id,
+      userId: account.userId,
       name: account.name,
       type: account.type,
       balance: account.balance.amount.toFixed(2),
@@ -47,18 +48,19 @@ export class DrizzleAccountRepository implements IAccountRepository {
     const [updated] = await db
       .update(accounts)
       .set(data)
-      .where(eq(accounts.id, account.id))
+      .where(and(eq(accounts.id, account.id), eq(accounts.userId, account.userId)))
       .returning();
     return this.mapToEntity(updated);
   }
 
-  async delete(id: string): Promise<void> {
-    await db.delete(accounts).where(eq(accounts.id, id));
+  async delete(userId: string, id: string): Promise<void> {
+    await db.delete(accounts).where(and(eq(accounts.id, id), eq(accounts.userId, userId)));
   }
 
   private mapToEntity(dbRecord: AccountDb): Account {
     const props: AccountProps = {
       id: dbRecord.id,
+      userId: dbRecord.userId,
       name: dbRecord.name,
       type: dbRecord.type as AccountType,
       balance: new Money(parseFloat(dbRecord.balance), 'BRL'),
@@ -74,6 +76,7 @@ export class DrizzleAccountRepository implements IAccountRepository {
   private mapToDb(account: Account): Record<string, unknown> {
     return {
       id: account.id,
+      userId: account.userId,
       name: account.name,
       type: account.type,
       balance: account.balance.amount.toFixed(2),

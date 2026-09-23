@@ -1,7 +1,8 @@
 import { Money, TransactionType } from '../value-objects';
 
-interface TransactionProps {
+export interface TransactionProps {
   id: string;
+  userId: string;
   description: string;
   amount: Money;
   type: TransactionType;
@@ -28,6 +29,10 @@ export class Transaction {
 
   get id(): string {
     return this.props.id;
+  }
+
+  get userId(): string {
+    return this.props.userId;
   }
 
   get description(): string {

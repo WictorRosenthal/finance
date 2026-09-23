@@ -2,9 +2,16 @@
 export const API_URL = 'http://localhost:3001';
 
 export async function api<T = any>(path: string, options: RequestInit = {}) {
+  const token = localStorage.getItem('token');
+  const { headers, ...requestOptions } = options;
+
   const response = await fetch(`${API_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
+    ...requestOptions,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
+    },
   });
 
   if (!response.ok) {

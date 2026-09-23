@@ -11,7 +11,7 @@ export class LoginMapper {
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      passwordHash: user.passwordHash,
+      passwordHash: user.passwordHash ?? '',
     };
   }
 

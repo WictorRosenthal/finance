@@ -4,6 +4,7 @@ import { AccountController } from '../controllers/AccountController';
 import { AgreementController } from '../controllers/AgreementController';
 import { authRoutes } from './authRoutes';
 import { AuthController } from '@presentation/controllers/AuthController';
+import { authenticateJWT } from '../middleware/authMiddleware';
 
 export async function registerRoutes(app: FastifyInstance) {
   const transactionController = new TransactionController();
@@ -13,6 +14,15 @@ export async function registerRoutes(app: FastifyInstance) {
 
   // Auth routes (JWT/OAuth)
   await authRoutes(app);
+
+  app.post('/api/register', authController.register.bind(authController));
+  app.post('/api/login', authController.login.bind(authController));
+  app.post('/api/oauth/callback', authController.oauthCallback.bind(authController));
+  app.get('/api/health', async () => {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  });
+
+  app.addHook('preHandler', authenticateJWT);
 
   // Transactions
   app.post('/api/transactions', transactionController.create.bind(transactionController));
@@ -36,13 +46,4 @@ export async function registerRoutes(app: FastifyInstance) {
   app.put('/api/agreements/:id', agreementController.update.bind(agreementController));
   app.delete('/api/agreements/:id', agreementController.delete.bind(agreementController));
 
-  // Auth
-  app.post('/api/register', authController.register.bind(authController)); 
-  app.post('/api/login', authController.login.bind(authController));
-  app.post('/api/oauth/callback', authController.oauthCallback.bind(authController));
-
-  // Health check
-  app.get('/api/health', async () => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
-  });
 }

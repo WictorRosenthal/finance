@@ -12,8 +12,8 @@ export class GetAgreementByIdUseCase {
     private readonly agreementRepository: IAgreementRepository
   ) {}
 
-  async execute(id: string): Promise<AgreementDTO> {
-    const agreement = await this.agreementRepository.findById(id);
+  async execute(userId: string, id: string): Promise<AgreementDTO> {
+    const agreement = await this.agreementRepository.findById(userId, id);
 
     if (!agreement) {
       throw new NotFoundError('Agreement', id);

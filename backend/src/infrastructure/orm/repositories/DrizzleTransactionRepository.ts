@@ -14,15 +14,15 @@ type TransactionSelect = InferSelectModel<typeof transactions>;
 
 @injectable()
 export class DrizzleTransactionRepository implements ITransactionRepository {
-  async findById(id: string): Promise<Transaction | null> {
-    const result = await db.select().from(transactions).where(eq(transactions.id, id));
+  async findById(userId: string, id: string): Promise<Transaction | null> {
+    const result = await db.select().from(transactions).where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
     return result[0] ? this.mapToEntity(result[0]) : null;
   }
 
-  async findAll(filters?: TransactionFilters): Promise<Transaction[]> {
+  async findAll(userId: string, filters?: TransactionFilters): Promise<Transaction[]> {
     let query = db.select().from(transactions);
     
-    const conditions = [];
+    const conditions = [eq(transactions.userId, userId)];
     
     if (filters?.accountId) {
       conditions.push(eq(transactions.accountId, filters.accountId));
@@ -52,19 +52,19 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
     return result.map(this.mapToEntity);
   }
 
-  async findByAccountId(accountId: string): Promise<Transaction[]> {
+  async findByAccountId(userId: string, accountId: string): Promise<Transaction[]> {
     const result = await db
       .select()
       .from(transactions)
-      .where(eq(transactions.accountId, accountId));
+      .where(and(eq(transactions.userId, userId), eq(transactions.accountId, accountId)));
     return result.map(this.mapToEntity);
   }
 
-  async findByDateRange(startDate: Date, endDate: Date): Promise<Transaction[]> {
+  async findByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Transaction[]> {
     const result = await db
       .select()
       .from(transactions)
-      .where(and(gte(transactions.date, startDate), lte(transactions.date, endDate)));
+      .where(and(eq(transactions.userId, userId), gte(transactions.date, startDate), lte(transactions.date, endDate)));
     return result.map(this.mapToEntity);
   }
 
@@ -79,17 +79,17 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
     const [updated] = await db
       .update(transactions)
       .set(data)
-      .where(eq(transactions.id, transaction.id))
+      .where(and(eq(transactions.id, transaction.id), eq(transactions.userId, transaction.userId)))
       .returning();
     return this.mapToEntity(updated);
   }
 
-  async delete(id: string): Promise<void> {
-    await db.delete(transactions).where(eq(transactions.id, id));
+  async delete(userId: string, id: string): Promise<void> {
+    await db.delete(transactions).where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
   }
 
-  async count(filters?: TransactionFilters): Promise<number> {
-    const conditions = [];
+  async count(userId: string, filters?: TransactionFilters): Promise<number> {
+    const conditions = [eq(transactions.userId, userId)];
     
     if (filters?.accountId) {
       conditions.push(eq(transactions.accountId, filters.accountId));
@@ -127,6 +127,7 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
     const paymentDateValue = (dbRecord as any).paymentDate;
     const props = {
       id: dbRecord.id,
+      userId: dbRecord.userId,
       description: dbRecord.description,
       amount: new Money(parseFloat(dbRecord.amount), 'BRL'),
       type: dbRecord.type as TransactionType,
@@ -146,6 +147,7 @@ export class DrizzleTransactionRepository implements ITransactionRepository {
   private mapToDb(transaction: Transaction): TransactionInsert {
     const dbObj = {
       id: transaction.id,
+      userId: transaction.userId,
       description: transaction.description,
       amount: transaction.amount.amount.toFixed(2),
       type: transaction.type,

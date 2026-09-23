@@ -11,10 +11,10 @@ export class GetAgreementsUseCase {
     private readonly agreementRepository: IAgreementRepository
   ) {}
 
-  async execute(includeInactive: boolean = false): Promise<AgreementDTO[]> {
+  async execute(userId: string, includeInactive: boolean = false): Promise<AgreementDTO[]> {
     const agreements = includeInactive 
-      ? await this.agreementRepository.findAll()
-      : await this.agreementRepository.findActive();
+      ? await this.agreementRepository.findAll(userId)
+      : await this.agreementRepository.findActive(userId);
 
     return AgreementMapper.toDTOList(agreements);
   }

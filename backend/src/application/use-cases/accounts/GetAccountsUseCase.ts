@@ -11,10 +11,10 @@ export class GetAccountsUseCase {
     private readonly accountRepository: IAccountRepository
   ) {}
 
-  async execute(includeInactive: boolean = false): Promise<AccountDTO[]> {
+  async execute(userId: string, includeInactive: boolean = false): Promise<AccountDTO[]> {
     const accounts = includeInactive 
-      ? await this.accountRepository.findAll()
-      : await this.accountRepository.findActive();
+      ? await this.accountRepository.findAll(userId)
+      : await this.accountRepository.findActive(userId);
 
     return AccountMapper.toDTOList(accounts);
   }

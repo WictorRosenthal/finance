@@ -2,10 +2,10 @@
 import { Agreement } from '../entities/Agreement';
 
 export interface IAgreementRepository {
-  findById(id: string): Promise<Agreement | null>;
-  findAll(): Promise<Agreement[]>;
-  findActive(): Promise<Agreement[]>;
+  findById(userId: string, id: string): Promise<Agreement | null>;
+  findAll(userId: string): Promise<Agreement[]>;
+  findActive(userId: string): Promise<Agreement[]>;
   save(agreement: Agreement): Promise<Agreement>;
   update(agreement: Agreement): Promise<Agreement>;
-  delete(id: string): Promise<void>;
+  delete(userId: string, id: string): Promise<void>;
 }

@@ -11,7 +11,7 @@ export class GetTransactionsUseCase {
     private readonly transactionRepository: ITransactionRepository
   ) {}
 
-  async execute(filters: TransactionFiltersDTO): Promise<PaginatedTransactionsDTO> {
+  async execute(userId: string, filters: TransactionFiltersDTO): Promise<PaginatedTransactionsDTO> {
     const page = filters.page ?? 1;
     const limit = filters.limit ?? 20;
     const offset = (page - 1) * limit;
@@ -21,11 +21,11 @@ export class GetTransactionsUseCase {
 
     // Buscar transações
     const [transactions, total] = await Promise.all([
-      this.transactionRepository.findAll({
+      this.transactionRepository.findAll(userId, {
         ...domainFilters,
         // Adicionar suporte a paginação se necessário
       }),
-      this.transactionRepository.count(domainFilters)
+      this.transactionRepository.count(userId, domainFilters)
     ]);
 
     return {

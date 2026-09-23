@@ -15,8 +15,8 @@ export class UpdateTransactionUseCase {
     private readonly transactionRepository: ITransactionRepository
   ) {}
 
-  async execute(id: string, dto: UpdateTransactionDTO): Promise<TransactionDTO> {
-    const existingTransaction = await this.transactionRepository.findById(id);
+  async execute(userId: string, id: string, dto: UpdateTransactionDTO): Promise<TransactionDTO> {
+    const existingTransaction = await this.transactionRepository.findById(userId, id);
 
     if (!existingTransaction) {
       throw new NotFoundError('Transaction', id);

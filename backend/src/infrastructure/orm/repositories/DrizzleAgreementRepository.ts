@@ -1,6 +1,6 @@
 // filepath: backend/src/infrastructure/orm/repositories/DrizzleAgreementRepository.ts
 import { inject, injectable } from 'tsyringe';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { IAgreementRepository } from '../../../domain/repositories/IAgreementRepository';
 import { Agreement, AgreementProps } from '../../../domain/entities/Agreement';
 import { Money } from '../../../domain/value-objects';
@@ -15,18 +15,18 @@ type AgreementSelect = InferSelectModel<typeof agreements>;
 
 @injectable()
 export class DrizzleAgreementRepository implements IAgreementRepository {
-  async findById(id: string): Promise<Agreement | null> {
-    const result = await db.select().from(agreements).where(eq(agreements.id, id));
+  async findById(userId: string, id: string): Promise<Agreement | null> {
+    const result = await db.select().from(agreements).where(and(eq(agreements.id, id), eq(agreements.userId, userId)));
     return result[0] ? this.mapToEntity(result[0]) : null;
   }
 
-  async findAll(): Promise<Agreement[]> {
-    const result = await db.select().from(agreements);
+  async findAll(userId: string): Promise<Agreement[]> {
+    const result = await db.select().from(agreements).where(eq(agreements.userId, userId));
     return result.map(this.mapToEntity);
   }
 
-  async findActive(): Promise<Agreement[]> {
-    const result = await db.select().from(agreements).where(eq(agreements.isActive, true));
+  async findActive(userId: string): Promise<Agreement[]> {
+    const result = await db.select().from(agreements).where(and(eq(agreements.userId, userId), eq(agreements.isActive, true)));
     return result.map(this.mapToEntity);
   }
 
@@ -41,18 +41,19 @@ export class DrizzleAgreementRepository implements IAgreementRepository {
     const [updated] = await db
       .update(agreements)
       .set(data)
-      .where(eq(agreements.id, agreement.id))
+      .where(and(eq(agreements.id, agreement.id), eq(agreements.userId, agreement.userId)))
       .returning();
     return this.mapToEntity(updated);
   }
 
-  async delete(id: string): Promise<void> {
-    await db.delete(agreements).where(eq(agreements.id, id));
+  async delete(userId: string, id: string): Promise<void> {
+    await db.delete(agreements).where(and(eq(agreements.id, id), eq(agreements.userId, userId)));
   }
 
   private mapToEntity(dbRecord: AgreementDb): Agreement {
     const props: AgreementProps = {
       id: dbRecord.id,
+      userId: dbRecord.userId,
       name: dbRecord.name,
       category: dbRecord.category,
       monthlyFee: dbRecord.monthlyFee != null? new Money(Number(dbRecord.monthlyFee), 'BRL') : undefined,
@@ -67,6 +68,7 @@ export class DrizzleAgreementRepository implements IAgreementRepository {
   private mapToDb(agreement: Agreement): AgreementInsert {
     return {
       id: agreement.id,
+      userId: agreement.userId,
       name: agreement.name,
       category: agreement.category,
       monthlyFee: agreement.monthlyFee

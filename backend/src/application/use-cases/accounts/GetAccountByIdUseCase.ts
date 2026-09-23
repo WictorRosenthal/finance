@@ -12,8 +12,8 @@ export class GetAccountByIdUseCase {
     private readonly accountRepository: IAccountRepository
   ) {}
 
-  async execute(id: string): Promise<AccountDTO> {
-    const account = await this.accountRepository.findById(id);
+  async execute(userId: string, id: string): Promise<AccountDTO> {
+    const account = await this.accountRepository.findById(userId, id);
 
     if (!account) {
       throw new NotFoundError('Account', id);

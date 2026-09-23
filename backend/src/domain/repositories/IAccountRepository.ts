@@ -2,10 +2,10 @@
 import { Account } from '../entities/Account';
 
 export interface IAccountRepository {
-  findById(id: string): Promise<Account | null>;
-  findAll(): Promise<Account[]>;
-  findActive(): Promise<Account[]>;
+  findById(userId: string, id: string): Promise<Account | null>;
+  findAll(userId: string): Promise<Account[]>;
+  findActive(userId: string): Promise<Account[]>;
   save(account: Account): Promise<Account>;
   update(account: Account): Promise<Account>;
-  delete(id: string): Promise<void>;
+  delete(userId: string, id: string): Promise<void>;
 }

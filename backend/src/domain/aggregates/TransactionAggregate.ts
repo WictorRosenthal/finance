@@ -3,6 +3,7 @@ import { Transaction } from '../entities/Transaction';
 import { Money, TransactionType } from '../value-objects';
 
 export interface CreateTransactionProps {
+  userId: string;
   description: string;
   amount: number;
   type: TransactionType;
@@ -50,6 +51,7 @@ export class TransactionAggregate {
     const now = new Date();
     const transactionProps = {
       id: uuidv4(),
+      userId: props.userId,
       description: props.description.trim(),
       amount: new Money(props.amount),
       type: props.type,

@@ -2,6 +2,7 @@ import { Money } from '../value-objects';
 
 export interface AgreementProps {
   id: string;
+  userId: string;
   name: string;
   category: string;
   monthlyFee?: Money;
@@ -19,6 +20,10 @@ export class Agreement {
 
   get id(): string {
     return this.props.id;
+  }
+
+  get userId(): string {
+    return this.props.userId;
   }
 
   get name(): string {

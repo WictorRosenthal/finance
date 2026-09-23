@@ -1,9 +1,10 @@
 // filepath: backend/src/infrastructure/orm/schema.ts
-import { pgTable, uuid, varchar, numeric, timestamp, boolean, serial, text} from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, numeric, timestamp, boolean, text} from 'drizzle-orm/pg-core';
 
 
 export const transactions = pgTable('transactions', {
   id: uuid('id').primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id),
   description: varchar('description', { length: 255 }).notNull(),
   amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
   type: varchar('type', { length: 20 }).notNull(),
@@ -18,6 +19,7 @@ export const transactions = pgTable('transactions', {
 
 export const accounts = pgTable('accounts', {
   id: uuid('id').primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id),
   name: varchar('name', { length: 255 }).notNull(),
   type: varchar('type', { length: 20 }).notNull(),
   balance: numeric('balance', { precision: 10, scale: 2 }).notNull(),
@@ -30,6 +32,7 @@ export const accounts = pgTable('accounts', {
 
 export const agreements = pgTable('agreements', {
   id: uuid('id').primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id),
   name: varchar('name', { length: 255 }).notNull(),
   category: varchar('category', { length: 100 }).notNull(),
   monthlyFee: numeric('monthly_fee', { precision: 10, scale: 2 }),

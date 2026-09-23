@@ -14,12 +14,13 @@ export class CreateAccountUseCase {
     private readonly accountRepository: IAccountRepository
   ) {}
 
-  async execute(dto: CreateAccountDTO): Promise<AccountDTO> {
+  async execute(userId: string, dto: CreateAccountDTO): Promise<AccountDTO> {
     const props = AccountMapper.toCreateProps(dto);
 
     const now = new Date();
     const accountProps: AccountProps = {
       id: uuidv4(),
+      userId,
       name: props.name,
       type: props.type,
       balance: new Money(props.balance),

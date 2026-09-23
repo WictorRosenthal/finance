@@ -10,13 +10,13 @@ export class DeleteAccountUseCase {
     private readonly accountRepository: IAccountRepository
   ) {}
 
-  async execute(id: string): Promise<void> {
-    const account = await this.accountRepository.findById(id);
+  async execute(userId: string, id: string): Promise<void> {
+    const account = await this.accountRepository.findById(userId, id);
 
     if (!account) {
       throw new NotFoundError('Account', id);
     }
 
-    await this.accountRepository.delete(id);
+    await this.accountRepository.delete(userId, id);
   }
 }
