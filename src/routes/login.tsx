@@ -1,21 +1,13 @@
 import { api } from "@/lib/api";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, LockKeyhole, Mail, ShieldCheck, LogIn } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-// Google OAuth
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -37,54 +29,6 @@ function LoginPage() {
       void navigate({ to: redirectTo as never });
     }
   }, [navigate, redirectTo]);
-
-  // Google OAuth handler
-  async function handleGoogleLogin() {
-    setSubmitting(true);
-    try {
-      // Carrega o script do Google Identity Services se não estiver carregado
-      if (!window.google) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://accounts.google.com/gsi/client";
-          script.async = true;
-          script.onload = resolve;
-          script.onerror = reject;
-          document.body.appendChild(script);
-        });
-      }
-
-      // Cria um botão invisível do Google
-      const div = document.createElement("div");
-      document.body.appendChild(div);
-
-      return new Promise<void>((resolve, reject) => {
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          callback: async (response: any) => {
-            try {
-              // Envia o token do Google para o backend
-              const data = await api<{ token?: string }>("/api/oauth/callback", {
-                method: "POST",
-                body: JSON.stringify({ provider: "google", token: response.credential }),
-              });
-              localStorage.setItem("token", data.token ?? "");
-              toast.success("Login social realizado com sucesso");
-              void navigate({ to: redirectTo as never });
-              resolve();
-            } catch (err: any) {
-              toast.error(err?.message || "Erro ao autenticar com Google");
-              reject(err);
-            }
-          },
-        });
-        window.google.accounts.id.prompt();
-      });
-    } catch (err) {
-      toast.error("Erro ao carregar login social");
-    }
-    setSubmitting(false);
-  }
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
@@ -118,60 +62,18 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-10 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-8"
-        >
-          <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Acesso protegido
-            </div>
-            <div>
-              <h1 className="font-display text-5xl font-bold tracking-tight text-foreground md:text-6xl">
-                Finance<span className="text-gradient-primary">Flow</span>
-              </h1>
-              <p className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
-                Entre para acompanhar movimentações, convênios e limites com dados isolados por
-                usuário e sessão segura.
-              </p>
-            </div>
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+      <Card className="w-full max-w-md border-border/60 bg-gradient-card shadow-card">
+        <CardContent className="space-y-6 p-6 md:p-8">
+          <div className="space-y-2 text-center">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
+              Finance<span className="text-gradient-primary">Flow</span>
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {mode === "login" ? "Entre na sua conta" : "Crie sua conta"}
+            </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {[
-              {
-                icon: LockKeyhole,
-                title: "JWT automático",
-                text: "Sua sessão fica protegida sem exigir configuração manual.",
-              },
-              {
-                icon: Mail,
-                title: "Acesso por usuário",
-                text: "Login tradicional com email e senha.",
-              },
-            ].map(({ icon: Icon, title, text }) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-border/50 bg-gradient-card p-5 shadow-card"
-              >
-                <Icon className="h-5 w-5 text-primary" />
-                <div className="mt-4 font-medium">{title}</div>
-                <p className="mt-1 text-sm text-muted-foreground">{text}</p>
-              </div>
-            ))}
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-        >
-          <Card className="border-border/60 bg-gradient-card shadow-card">
-            <CardContent className="space-y-6 p-6 md:p-8">
               <div className="grid grid-cols-2 gap-2 rounded-xl bg-background/50 p-1">
                 {[
                   { key: "login", label: "Entrar" },
@@ -206,8 +108,7 @@ function LoginPage() {
                   />
                 </div>
 
-                {/* Campo nome só aparece no cadastro */}
-                {mode === "signup" && (
+              {mode === "signup" && (
                   <div className="space-y-1.5">
                     <Label>Nome</Label>
                     <Input
@@ -222,7 +123,7 @@ function LoginPage() {
                   </div>
                 )}
 
-                <div className="space-y-1.5">
+              <div className="space-y-1.5">
                   <Label>Senha</Label>
                   <Input
                     type="password"
@@ -236,43 +137,17 @@ function LoginPage() {
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className="h-11 w-full rounded-xl bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90"
-                >
-                  {submitting ? "Processando..." : mode === "login" ? "Entrar" : "Criar conta"}
-                  <ArrowRight className="ml-1.5 h-4 w-4" />
-                </Button>
-              </form>
-
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-px bg-border" />
-                <span className="text-xs text-muted-foreground">ou</span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2"
-                onClick={handleGoogleLogin}
-                disabled={submitting}
-              >
-                <LogIn className="h-4 w-4" />
-                Entrar com Google
-              </Button>
-
-              <p className="text-center text-xs text-muted-foreground">
-                Ao continuar, seus dados ficam protegidos por sessão individual.
-                <Link to="/" className="ml-1 text-primary underline underline-offset-4">
-                  Voltar
-                </Link>
-              </p>
-            </CardContent>
-          </Card>
-        </motion.section>
-      </div>
-    </div>
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="h-11 w-full rounded-xl bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90"
+            >
+              {submitting ? "Processando..." : mode === "login" ? "Entrar" : "Criar conta"}
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </main>
   );
 }
