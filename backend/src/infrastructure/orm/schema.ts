@@ -51,6 +51,9 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash"), // nullable para OAuth
   name: text("name").notNull(),
+  address: text("address"),
+  phone: text("phone"),
+  avatarUrl: text("avatar_url"),
   oauthProvider: text("oauth_provider"), // nullable
   oauthId: text("oauth_id"), // nullable
   role: text("role").notNull(), // 'admin' | 'read-only'

@@ -101,8 +101,6 @@ function RootComponent() {
   const currentPath = location.pathname;
   const [authChecked, setAuthChecked] = useState(false);
   const [hasToken, setHasToken] = useState(false);
-  const needsLogin = authChecked && !hasToken && currentPath !== "/login";
-  const needsRedirectHome = authChecked && hasToken && currentPath === "/login";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -110,17 +108,17 @@ function RootComponent() {
     setHasToken(hasStoredToken);
     setAuthChecked(true);
 
-    if (needsLogin) {
+    if (!hasStoredToken && currentPath !== "/login") {
       navigate({ to: "/login", search: { redirect: currentPath }, replace: true });
       return;
     }
 
-    if (needsRedirectHome) {
+    if (hasStoredToken && currentPath === "/login") {
       navigate({ to: "/", replace: true });
     }
-  }, [currentPath, navigate, needsLogin, needsRedirectHome]);
+  }, [currentPath, navigate]);
 
-  if (!authChecked || needsLogin || needsRedirectHome) {
+  if (!authChecked) {
     return null;
   }
 

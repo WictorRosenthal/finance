@@ -15,6 +15,13 @@
       "when": 1790182933777,
       "tag": "0001_user_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790182933778,
+      "tag": "0002_profile_fields",
+      "breakpoints": true
     }
   ]
 }

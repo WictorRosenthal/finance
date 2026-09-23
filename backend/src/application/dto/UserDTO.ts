@@ -2,6 +2,9 @@ export interface UserDTO {
   id: string;
   email: string;
   name: string;
+  address?: string;
+  phone?: string;
+  avatarUrl?: string;
   role: string;
   createdAt: Date;
   updatedAt: Date;

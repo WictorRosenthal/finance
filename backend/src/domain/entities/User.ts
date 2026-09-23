@@ -5,6 +5,9 @@ export interface UserProps {
   email: string;
   passwordHash?: string;
   name: string;
+  address?: string;
+  phone?: string;
+  avatarUrl?: string;
   oauthProvider?: string;
   oauthId?: string;
   role: UserRole;
@@ -34,6 +37,18 @@ export class User {
 
   get name(): string {
     return this.props.name;
+  }
+
+  get address(): string | undefined {
+    return this.props.address;
+  }
+
+  get phone(): string | undefined {
+    return this.props.phone;
+  }
+
+  get avatarUrl(): string | undefined {
+    return this.props.avatarUrl;
   }
 
   get oauthProvider(): string | undefined {
@@ -77,6 +92,31 @@ export class User {
       throw new Error("Invalid role");
     }
     this.props.role = role;
+    this.touch();
+  }
+
+  updateProfile(profile: {
+    name: string;
+    email: string;
+    address?: string;
+    phone?: string;
+    avatarUrl?: string;
+  }): void {
+    const name = profile.name.trim();
+    const email = profile.email.trim();
+
+    if (!name) {
+      throw new Error("Name cannot be empty");
+    }
+    if (!email) {
+      throw new Error("Email cannot be empty");
+    }
+
+    this.props.name = name;
+    this.props.email = email;
+    this.props.address = profile.address?.trim() || undefined;
+    this.props.phone = profile.phone?.trim() || undefined;
+    this.props.avatarUrl = profile.avatarUrl?.trim() || undefined;
     this.touch();
   }
 

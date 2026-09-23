@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConveniosRouteImport } from './routes/convenios'
 import { Route as ContasRouteImport } from './routes/contas'
@@ -17,6 +18,11 @@ import { Route as TransacoesIndexRouteImport } from './routes/transacoes.index'
 import { Route as TransacoesNovaRouteImport } from './routes/transacoes.nova'
 import { Route as TransacoesIdRouteImport } from './routes/transacoes.$id'
 
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/contas': typeof ContasRoute
   '/convenios': typeof ConveniosRoute
   '/login': typeof LoginRoute
+  '/perfil': typeof PerfilRoute
   '/transacoes/$id': typeof TransacoesIdRoute
   '/transacoes/nova': typeof TransacoesNovaRoute
   '/transacoes/': typeof TransacoesIndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/contas': typeof ContasRoute
   '/convenios': typeof ConveniosRoute
   '/login': typeof LoginRoute
+  '/perfil': typeof PerfilRoute
   '/transacoes/$id': typeof TransacoesIdRoute
   '/transacoes/nova': typeof TransacoesNovaRoute
   '/transacoes': typeof TransacoesIndexRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/contas': typeof ContasRoute
   '/convenios': typeof ConveniosRoute
   '/login': typeof LoginRoute
+  '/perfil': typeof PerfilRoute
   '/transacoes/$id': typeof TransacoesIdRoute
   '/transacoes/nova': typeof TransacoesNovaRoute
   '/transacoes/': typeof TransacoesIndexRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/contas'
     | '/convenios'
     | '/login'
+    | '/perfil'
     | '/transacoes/$id'
     | '/transacoes/nova'
     | '/transacoes/'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/contas'
     | '/convenios'
     | '/login'
+    | '/perfil'
     | '/transacoes/$id'
     | '/transacoes/nova'
     | '/transacoes'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/contas'
     | '/convenios'
     | '/login'
+    | '/perfil'
     | '/transacoes/$id'
     | '/transacoes/nova'
     | '/transacoes/'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   ContasRoute: typeof ContasRoute
   ConveniosRoute: typeof ConveniosRoute
   LoginRoute: typeof LoginRoute
+  PerfilRoute: typeof PerfilRoute
   TransacoesIdRoute: typeof TransacoesIdRoute
   TransacoesNovaRoute: typeof TransacoesNovaRoute
   TransacoesIndexRoute: typeof TransacoesIndexRoute
@@ -123,6 +136,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContasRoute: ContasRoute,
   ConveniosRoute: ConveniosRoute,
   LoginRoute: LoginRoute,
+  PerfilRoute: PerfilRoute,
   TransacoesIdRoute: TransacoesIdRoute,
   TransacoesNovaRoute: TransacoesNovaRoute,
   TransacoesIndexRoute: TransacoesIndexRoute,

@@ -29,6 +29,8 @@ import { GetAgreementsUseCase } from "../../application/use-cases/agreements/Get
 import { GetAgreementByIdUseCase } from "../../application/use-cases/agreements/GetAgreementByIdUseCase.js";
 import { UpdateAgreementUseCase } from "../../application/use-cases/agreements/UpdateAgreementUseCase.js";
 import { DeleteAgreementUseCase } from "../../application/use-cases/agreements/DeleteAgreementUseCase.js";
+import { GetProfileUseCase } from "../../application/use-cases/profile/GetProfileUseCase.js";
+import { UpdateProfileUseCase } from "../../application/use-cases/profile/UpdateProfileUseCase.js";
 
 // Oauth - Users
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
@@ -79,6 +81,9 @@ container.registerSingleton(GetAgreementsUseCase);
 container.registerSingleton(GetAgreementByIdUseCase);
 container.registerSingleton(UpdateAgreementUseCase);
 container.registerSingleton(DeleteAgreementUseCase);
+
+container.registerSingleton(GetProfileUseCase);
+container.registerSingleton(UpdateProfileUseCase);
 
 container.register<RegisterUserUseCase>("RegisterUserUseCase", {
   useFactory: (c) => new RegisterUserUseCase(c.resolve("IUserRepository")),
