@@ -118,7 +118,7 @@ function RootComponent() {
     }
   }, [currentPath, navigate]);
 
-  if (!authChecked) {
+  if (!authChecked || (currentPath !== "/login" && !hasToken)) {
     return null;
   }
 
