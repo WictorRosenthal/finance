@@ -1,6 +1,6 @@
 # AI Engineering Framework
 
-> **Gerado a partir do bob_framework:** v1.5.0
+> **Gerado a partir do bob_framework:** v1.9.0
 
 Este diretório é a fonte canônica de verdade para a engenharia de IA deste repositório. Ele centraliza a constituição, instruções, agentes, workflows, specs e contexto que orientam a implementação e a revisão de mudanças.
 

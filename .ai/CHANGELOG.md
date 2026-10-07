@@ -1,5 +1,9 @@
 # Changelog do `.ai/`
 
+## [0.3.0] - 2026-10-07
+
+Sincronizado com o `bob_framework` v1.9.0: a lista de comandos foi alinhada com as entradas atuais do framework, incluindo `/bob-update` e `/bob-adr`, e o carimbo de versão foi atualizado para refletir a sincronização com a base canônica do BoB.
+
 ## [0.2.0] - 2026-09-23
 
 Adicionado o agente `Construtor Frontend` para implementacao de telas e fluxos React.

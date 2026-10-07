@@ -16,6 +16,7 @@ export async function registerRoutes(app: FastifyInstance) {
 
   app.post("/api/register", authController.register.bind(authController));
   app.post("/api/login", authController.login.bind(authController));
+  app.get("/api/oauth/callback", authController.oauthCallback.bind(authController));
   app.post("/api/oauth/callback", authController.oauthCallback.bind(authController));
   app.get("/api/health", async () => {
     return { status: "ok", timestamp: new Date().toISOString() };

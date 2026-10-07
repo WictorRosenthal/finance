@@ -19,7 +19,22 @@ export class AuthController {
   }
 
   async oauthCallback(request: FastifyRequest, reply: FastifyReply) {
-    const { provider, token } = request.body as any;
+    const payload = {
+      ...(typeof request.body === "object" && request.body ? (request.body as Record<string, unknown>) : {}),
+      ...(typeof request.query === "object" && request.query ? (request.query as Record<string, unknown>) : {}),
+    };
+
+    const provider = String(payload.provider ?? "google").trim();
+    const token = String(
+      payload.token ?? payload.credential ?? payload.idToken ?? payload.code ?? "",
+    ).trim();
+
+    if (!provider || !token) {
+      return reply.status(400).send({
+        error: "Provider e token são obrigatórios para o OAuth callback.",
+      });
+    }
+
     const useCase = container.resolve("OAuthCallbackUseCase") as {
       execute: (provider: string, token: string) => Promise<string>;
     };
