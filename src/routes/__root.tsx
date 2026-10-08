@@ -22,7 +22,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-glow-primary hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm hover:opacity-90"
           >
             Voltar ao início
           </Link>
@@ -101,10 +101,17 @@ function RootComponent() {
   const currentPath = location.pathname;
   const [authChecked, setAuthChecked] = useState(false);
   const [hasToken, setHasToken] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const hasStoredToken = Boolean(token);
+    const savedTheme = localStorage.getItem("theme") ?? "system";
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = savedTheme === "dark" || (savedTheme === "system" && prefersDark);
+
+    document.documentElement.classList.toggle("dark", isDark);
+    setTheme(isDark ? "dark" : "light");
     setHasToken(hasStoredToken);
     setAuthChecked(true);
 
@@ -125,7 +132,7 @@ function RootComponent() {
   return (
     <>
       <Outlet />
-      <Toaster theme="dark" position="top-right" richColors />
+      <Toaster theme={theme} position="top-right" richColors />
     </>
   );
 }

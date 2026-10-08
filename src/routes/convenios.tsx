@@ -152,7 +152,7 @@ function ConveniosPage() {
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full">
+              <Button className="rounded-full bg-primary text-primary-foreground hover:opacity-90">
                 <Plus className="mr-1.5 h-4 w-4" /> Novo convênio
               </Button>
             </DialogTrigger>
@@ -210,7 +210,7 @@ function ConveniosPage() {
                 <Button variant="outline" onClick={() => setOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={create} className="bg-gradient-primary text-primary-foreground">
+                <Button onClick={create} className="bg-primary text-primary-foreground">
                   Criar
                 </Button>
               </DialogFooter>
@@ -225,7 +225,7 @@ function ConveniosPage() {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <Card className="bg-gradient-card border-border/50 shadow-card">
+          <Card className="border-border bg-card">
             <CardContent className="p-16 text-center text-muted-foreground">
               Nenhum convênio cadastrado.
             </CardContent>
@@ -235,12 +235,12 @@ function ConveniosPage() {
             {items.map((c) => (
               <Card
                 key={c.id}
-                className={`bg-gradient-card border-border/50 shadow-card group ${!c.active ? "opacity-60" : ""}`}
+                className={`border-border bg-card group ${!c.active ? "opacity-60" : ""}`}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-accent shadow-glow-accent flex items-center justify-center shrink-0">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-foreground">
                         <Tag className="h-5 w-5 text-accent-foreground" />
                       </div>
                       <div className="min-w-0">

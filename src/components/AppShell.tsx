@@ -1,5 +1,14 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, ArrowLeftRight, Wallet, Tag, LogOut, User } from "lucide-react";
+import {
+  LayoutDashboard,
+  ArrowLeftRight,
+  Wallet,
+  Tag,
+  LogOut,
+  User,
+  MoonStar,
+  SunMedium,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -65,7 +74,7 @@ function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="h-10 w-10 rounded-full bg-gradient-primary text-white flex items-center justify-center font-semibold shadow hover:opacity-90 transition">
+        <button className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background font-semibold text-foreground shadow-sm transition hover:bg-accent">
           {user?.avatarUrl ? (
             <img
               src={user.avatarUrl}
@@ -122,19 +131,35 @@ const NAV = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { location } = useRouterState();
   const path = location.pathname;
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const nextTheme = savedTheme === "dark" || (!savedTheme && prefersDark) ? "dark" : "light";
+
+    setTheme(nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    localStorage.setItem("theme", nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+  };
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-40 glass border-b border-border/50">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
-          {/* LOGO */}
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="relative h-9 w-9 rounded-xl bg-gradient-primary shadow-glow-primary flex items-center justify-center">
-              <span className="font-display font-bold text-primary-foreground text-lg">F</span>
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border bg-card/90 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary">
+              F
             </div>
             <div className="leading-tight">
-              <div className="font-display font-bold text-lg tracking-tight">
-                Finance<span className="text-gradient-primary">Flow</span>
+              <div className="font-display text-lg font-bold tracking-tight">
+                Finance<span className="text-primary">Flow</span>
               </div>
               <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 Controle financeiro
@@ -142,8 +167,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
 
-          {/* NAV DESKTOP */}
-          <nav className="hidden md:flex items-center gap-1 p-1 rounded-full bg-card/60 border border-border/50">
+          <nav className="hidden items-center gap-1 rounded-full border border-border bg-muted/40 p-1 md:flex">
             {NAV.map(({ to, label, icon: Icon }) => {
               const active = to === "/" ? path === "/" : path.startsWith(to);
 
@@ -152,27 +176,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   key={to}
                   to={to}
                   className={cn(
-                    "px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors",
+                    "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
                     active
-                      ? "bg-primary text-primary-foreground shadow-glow-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground",
                   )}
                 >
-                  <Icon className="h-3.5 w-3.5" />
+                  <Icon className="h-4 w-4" />
                   {label}
                 </Link>
               );
             })}
           </nav>
 
-          {/* USER MENU */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:text-foreground"
+              aria-label="Alternar tema"
+            >
+              {theme === "dark" ? <SunMedium className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
+            </button>
             <UserMenu />
           </div>
         </div>
 
-        {/* NAV MOBILE */}
-        <nav className="md:hidden flex items-center gap-1 px-4 pb-3 overflow-x-auto">
+        <nav className="flex gap-2 overflow-x-auto px-4 pb-3 md:hidden">
           {NAV.map(({ to, label, icon: Icon }) => {
             const active = to === "/" ? path === "/" : path.startsWith(to);
 
@@ -181,23 +211,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={to}
                 to={to}
                 className={cn(
-                  "shrink-0 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5",
+                  "shrink-0 rounded-full border px-3 py-2 text-xs font-medium",
                   active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground bg-card/60 border border-border/50",
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-muted-foreground",
                 )}
               >
-                <Icon className="h-3 w-3" />
-                {label}
+                <span className="flex items-center gap-1.5">
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                </span>
               </Link>
             );
           })}
         </nav>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
 
-      <footer className="mx-auto max-w-7xl px-6 py-10 text-center text-xs text-muted-foreground">
+      <footer className="mx-auto max-w-7xl px-4 py-8 text-center text-xs text-muted-foreground sm:px-6">
         FinanceFlow · controle pessoal · {new Date().getFullYear()}
       </footer>
     </div>

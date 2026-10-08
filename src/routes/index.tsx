@@ -254,7 +254,7 @@ function DashboardPage() {
           <Button
             asChild
             size="lg"
-            className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full"
+            className="rounded-full bg-primary text-primary-foreground hover:opacity-90"
           >
             <Link to="/transacoes/nova">
               <Plus className="mr-1.5 h-4 w-4" /> Nova movimentação
@@ -289,7 +289,7 @@ function DashboardPage() {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="lg:col-span-2 bg-gradient-card border-border/50 shadow-card">
+          <Card className="lg:col-span-2 border-border bg-card">
             <CardHeader>
               <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <TrendingUp className="h-3.5 w-3.5" /> Despesas por categoria
@@ -342,7 +342,7 @@ function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card border-border/50 shadow-card">
+          <Card className="border-border bg-card">
             <CardHeader>
               <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Receitas por categoria
@@ -425,12 +425,12 @@ function KpiCard({
 }) {
   return (
     <Card
-      className={`relative overflow-hidden border-border/50 shadow-card ${
-        highlight ? "bg-gradient-card" : "bg-card"
+      className={`relative overflow-hidden border-border ${
+        highlight ? "bg-accent/20" : "bg-card"
       }`}
     >
       {highlight && (
-        <div className="absolute inset-0 bg-gradient-primary opacity-[0.06] pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-primary/5" />
       )}
       <CardContent className="p-6 relative">
         <div className="flex items-center justify-between text-xs text-muted-foreground uppercase tracking-wider">

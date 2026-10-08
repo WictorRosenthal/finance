@@ -117,7 +117,7 @@ function AccountsPage() {
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full">
+              <Button className="rounded-full bg-primary text-primary-foreground hover:opacity-90">
                 <Plus className="mr-1.5 h-4 w-4" /> Nova conta
               </Button>
             </DialogTrigger>
@@ -174,7 +174,7 @@ function AccountsPage() {
                 <Button variant="outline" onClick={() => setOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={create} className="bg-gradient-primary text-primary-foreground">
+                <Button onClick={create} className="bg-primary text-primary-foreground">
                   Criar
                 </Button>
               </DialogFooter>
@@ -189,7 +189,7 @@ function AccountsPage() {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <Card className="bg-gradient-card border-border/50 shadow-card">
+          <Card className="border-border bg-card">
             <CardContent className="p-16 text-center text-muted-foreground">
               Nenhuma conta cadastrada.
             </CardContent>
@@ -199,7 +199,7 @@ function AccountsPage() {
             {items.map((a) => (
               <Card
                 key={a.id}
-                className="bg-gradient-card border-border/50 shadow-card group hover:shadow-glow-primary transition-shadow"
+                className="border-border bg-card transition-colors hover:bg-accent/30"
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">

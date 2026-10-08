@@ -63,84 +63,89 @@ function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
-      <Card className="w-full max-w-md border-border/60 bg-gradient-card shadow-card">
+      <Card className="w-full max-w-md border-border bg-card shadow-card">
         <CardContent className="space-y-6 p-6 md:p-8">
           <div className="space-y-2 text-center">
+            <div className="mb-4 flex items-center justify-center gap-2">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-lg font-bold text-primary-foreground">
+                F
+              </div>
+            </div>
             <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
-              Finance<span className="text-gradient-primary">Flow</span>
+              Finance<span className="text-primary">Flow</span>
             </h1>
             <p className="text-sm text-muted-foreground">
               {mode === "login" ? "Entre na sua conta" : "Crie sua conta"}
             </p>
           </div>
 
-              <div className="grid grid-cols-2 gap-2 rounded-xl bg-background/50 p-1">
-                {[
-                  { key: "login", label: "Entrar" },
-                  { key: "signup", label: "Criar conta" },
-                ].map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => setMode(item.key as "login" | "signup")}
-                    className={
-                      mode === item.key
-                        ? "rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
-                        : "rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground"
-                    }
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
+          <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted p-1">
+            {[
+              { key: "login", label: "Entrar" },
+              { key: "signup", label: "Criar conta" },
+            ].map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setMode(item.key as "login" | "signup")}
+                className={
+                  mode === item.key
+                    ? "rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                    : "rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground"
+                }
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
 
-              <form onSubmit={handleAuth} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Email</Label>
-                  <Input
-                    type="email"
-                    autoComplete="username"
-                    value={form.email}
-                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                    placeholder="Seu email"
-                    className="bg-background/50"
-                    required
-                  />
-                </div>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                autoComplete="username"
+                value={form.email}
+                onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="Seu email"
+                className="bg-background"
+                required
+              />
+            </div>
 
-              {mode === "signup" && (
-                  <div className="space-y-1.5">
-                    <Label>Nome</Label>
-                    <Input
-                      type="text"
-                      autoComplete="name"
-                      value={form.name}
-                      onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                      placeholder="Seu nome"
-                      className="bg-background/50"
-                      required
-                    />
-                  </div>
-                )}
-
+            {mode === "signup" && (
               <div className="space-y-1.5">
-                  <Label>Senha</Label>
-                  <Input
-                    type="password"
-                    autoComplete={mode === "login" ? "current-password" : "new-password"}
-                    value={form.password}
-                    onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-                    placeholder="••••••••"
-                    className="bg-background/50"
-                    required
-                    minLength={6}
-                  />
-                </div>
+                <Label>Nome</Label>
+                <Input
+                  type="text"
+                  autoComplete="name"
+                  value={form.name}
+                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Seu nome"
+                  className="bg-background"
+                  required
+                />
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label>Senha</Label>
+              <Input
+                type="password"
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                value={form.password}
+                onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+                placeholder="••••••••"
+                className="bg-background"
+                required
+                minLength={6}
+              />
+            </div>
 
             <Button
               type="submit"
               disabled={submitting}
-              className="h-11 w-full rounded-xl bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90"
+              className="h-11 w-full rounded-xl bg-primary text-primary-foreground"
             >
               {submitting ? "Processando..." : mode === "login" ? "Entrar" : "Criar conta"}
               <ArrowRight className="ml-1.5 h-4 w-4" />

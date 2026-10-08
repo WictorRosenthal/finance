@@ -272,17 +272,14 @@ function TransactionsPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Histórico</p>
             <h1 className="font-display text-4xl font-bold mt-1">Movimentações</h1>
           </div>
-          <Button
-            asChild
-            className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90 rounded-full"
-          >
+          <Button asChild className="rounded-full bg-primary text-primary-foreground hover:opacity-90">
             <Link to="/transacoes/nova">
               <Plus className="mr-1.5 h-4 w-4" /> Nova
             </Link>
           </Button>
         </div>
 
-        <Card className="bg-gradient-card border-border/50 shadow-card">
+        <Card className="border-border bg-card">
           <CardContent className="p-4 flex flex-wrap gap-3 items-center">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -357,7 +354,7 @@ function TransactionsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-card border-border/50 shadow-card overflow-hidden">
+        <Card className="overflow-hidden border-border bg-card">
           <CardContent className="p-0">
             {loading ? (
               <div className="p-6 space-y-3">

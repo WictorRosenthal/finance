@@ -126,9 +126,9 @@ function ProfilePage() {
         </header>
 
         <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <Card className="h-fit border-border/60 bg-gradient-card shadow-card">
+          <Card className="h-fit border-border bg-card">
             <CardContent className="flex flex-col items-center gap-5 p-6 text-center">
-              <Avatar className="h-32 w-32 border-4 border-primary/20 shadow-glow-primary">
+              <Avatar className="h-32 w-32 border-4 border-primary/20 shadow-sm">
                 <AvatarImage src={photo ?? undefined} alt="Foto de perfil" />
                 <AvatarFallback className="bg-primary/15 text-3xl font-semibold text-primary">
                   {getInitials(form.name) || <UserRound className="h-10 w-10" />}
@@ -155,7 +155,7 @@ function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/60 bg-gradient-card shadow-card">
+          <Card className="border-border bg-card">
             <CardHeader>
               <CardTitle>Dados pessoais</CardTitle>
             </CardHeader>
@@ -226,7 +226,7 @@ function ProfilePage() {
                 <Button
                   type="submit"
                   disabled={loading || saving}
-                  className="bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   <Save className="mr-2 h-4 w-4" />
                   {saving ? "Salvando..." : "Salvar alterações"}

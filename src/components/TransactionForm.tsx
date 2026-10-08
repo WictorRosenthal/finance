@@ -381,7 +381,7 @@ export function TransactionForm({ id }: { id?: string }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <Card className="bg-gradient-card border-border/50 shadow-card">
+          <Card className="border-border bg-card">
             <CardContent className="p-6 space-y-5">
               {/* Tipo */}
               <div className="grid grid-cols-2 gap-2 p-1 bg-background/50 rounded-xl">
@@ -393,8 +393,8 @@ export function TransactionForm({ id }: { id?: string }) {
                     className={`py-2.5 rounded-lg text-sm font-medium capitalize transition-all ${
                       values.type === t
                         ? t === "receita"
-                          ? "bg-success text-success-foreground shadow-glow-primary"
-                          : "bg-card border border-border shadow-card"
+                          ? "bg-success text-success-foreground"
+                          : "border border-border bg-card"
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -734,7 +734,7 @@ export function TransactionForm({ id }: { id?: string }) {
                 <Button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 bg-gradient-primary text-primary-foreground shadow-glow-primary hover:opacity-90"
+                  className="flex-1 bg-primary text-primary-foreground hover:opacity-90"
                 >
                   <Save className="mr-1.5 h-4 w-4" />
                   {saving ? "Salvando..." : id ? "Atualizar" : "Cadastrar"}

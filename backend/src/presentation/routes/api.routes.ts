@@ -14,10 +14,14 @@ export async function registerRoutes(app: FastifyInstance) {
   const profileController = new ProfileController();
   const protectedRoute = { preHandler: authenticateJWT };
 
+  const oauthCallbackHandler = authController.oauthCallback.bind(authController);
+
   app.post("/api/register", authController.register.bind(authController));
   app.post("/api/login", authController.login.bind(authController));
-  app.get("/api/oauth/callback", authController.oauthCallback.bind(authController));
-  app.post("/api/oauth/callback", authController.oauthCallback.bind(authController));
+  app.get("/oauth/callback", oauthCallbackHandler);
+  app.post("/oauth/callback", oauthCallbackHandler);
+  app.get("/api/oauth/callback", oauthCallbackHandler);
+  app.post("/api/oauth/callback", oauthCallbackHandler);
   app.get("/api/health", async () => {
     return { status: "ok", timestamp: new Date().toISOString() };
   });
