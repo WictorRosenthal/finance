@@ -72,7 +72,7 @@ function LoginPage() {
               </div>
             </div>
             <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
-              Finance<span className="text-primary">Flow</span>
+              MeuFinanceiro
             </h1>
             <p className="text-sm text-muted-foreground">
               {mode === "login" ? "Entre na sua conta" : "Crie sua conta"}

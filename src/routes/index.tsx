@@ -23,6 +23,11 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Target,
+  CheckCircle2,
+  AlertTriangle,
+  Download,
+  PencilLine,
 } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
@@ -30,7 +35,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CATEGORY_COLORS, formatBRL, formatDateBR } from "@/lib/finance";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  CATEGORY_COLORS,
+  calculateBudgetSummary,
+  formatBRL,
+  formatDateBR,
+  getBudgetConfig,
+  saveBudgetConfig,
+} from "@/lib/finance";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -121,11 +140,18 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [monthTx, setMonthTx] = useState<Tx[]>([]);
   const [recent, setRecent] = useState<Tx[]>([]);
+  const [budgetConfig, setBudgetConfig] = useState(() => getBudgetConfig());
+  const [budgetModalOpen, setBudgetModalOpen] = useState(false);
+  const [budgetDraft, setBudgetDraft] = useState(() => getBudgetConfig());
   // control current month shown (use first day of month)
   const [currentMonth, setCurrentMonth] = useState<Date>(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+
+  useEffect(() => {
+    saveBudgetConfig(budgetConfig);
+  }, [budgetConfig]);
 
   useEffect(() => {
     void load();
@@ -189,33 +215,98 @@ function DashboardPage() {
     setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
   }
 
-  const { receitas, despesas, saldo, despPorCategoria, recPorCategoria } = useMemo(() => {
-    const val = (t: Tx) => Number(t.final_amount ?? t.amount);
-    const r = monthTx.filter((t) => t.type === "receita").reduce((s, t) => s + val(t), 0);
-    const d = monthTx.filter((t) => t.type === "despesa").reduce((s, t) => s + val(t), 0);
+  const { receitas, despesas, saldo, despPorCategoria, recPorCategoria, budgetSummary } =
+    useMemo(() => {
+      const val = (t: Tx) => Number(t.final_amount ?? t.amount);
+      const r = monthTx.filter((t) => t.type === "receita").reduce((s, t) => s + val(t), 0);
+      const d = monthTx.filter((t) => t.type === "despesa").reduce((s, t) => s + val(t), 0);
 
-    const groupBy = (type: "receita" | "despesa") => {
-      const map = new Map<string, number>();
-      monthTx
-        .filter((t) => t.type === type)
-        .forEach((t) => {
-          map.set(t.category, (map.get(t.category) ?? 0) + val(t));
-        });
-      return Array.from(map.entries())
-        .map(([category, total]) => ({ category, total }))
-        .sort((a, b) => b.total - a.total);
-    };
+      const groupBy = (type: "receita" | "despesa") => {
+        const map = new Map<string, number>();
+        monthTx
+          .filter((t) => t.type === type)
+          .forEach((t) => {
+            map.set(t.category, (map.get(t.category) ?? 0) + val(t));
+          });
+        return Array.from(map.entries())
+          .map(([category, total]) => ({ category, total }))
+          .sort((a, b) => b.total - a.total);
+      };
 
-    return {
-      receitas: r,
-      despesas: d,
-      saldo: r - d,
-      despPorCategoria: groupBy("despesa"),
-      recPorCategoria: groupBy("receita"),
-    };
-  }, [monthTx]);
+      return {
+        receitas: r,
+        despesas: d,
+        saldo: r - d,
+        despPorCategoria: groupBy("despesa"),
+        recPorCategoria: groupBy("receita"),
+        budgetSummary: calculateBudgetSummary(
+          monthTx.map((t) => ({
+            type: t.type,
+            category: t.category,
+            amount: Number(t.amount),
+            final_amount: t.final_amount,
+          })),
+          budgetConfig,
+        ),
+      };
+    }, [budgetConfig, monthTx]);
 
   const monthLabel = currentMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  const visibleCategoryBudgets = budgetSummary.categoryBreakdown.slice(0, 4);
+
+  function openBudgetModal() {
+    setBudgetDraft({
+      ...budgetConfig,
+      categoryLimits: { ...budgetConfig.categoryLimits },
+    });
+    setBudgetModalOpen(true);
+  }
+
+  function saveBudgetModal() {
+    setBudgetConfig(budgetDraft);
+    setBudgetModalOpen(false);
+    toast.success("Metas de orçamento atualizadas");
+  }
+
+  function exportCurrentReport() {
+    const rows: Array<Array<string>> = [
+      ["Mês", monthLabel],
+      ["Receitas", formatBRL(receitas)],
+      ["Despesas", formatBRL(despesas)],
+      ["Saldo", formatBRL(saldo)],
+      ["Meta mensal", formatBRL(budgetSummary.monthlyLimit)],
+      ["Restante", formatBRL(budgetSummary.remainingBudget)],
+      ["Uso do orçamento", `${Math.min(100, budgetSummary.spentPercentage).toFixed(0)}%`],
+      [],
+      ["Categoria", "Gasto", "Meta", "Restante", "Acima do limite"],
+      ...budgetSummary.categoryBreakdown.map((item) => [
+        item.category,
+        item.spent.toFixed(2),
+        item.limit.toFixed(2),
+        item.remaining.toFixed(2),
+        item.isOverBudget ? "Sim" : "Não",
+      ]),
+    ];
+
+    const csv = rows
+      .map((row) =>
+        row
+          .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
+          .join(";"),
+      )
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `relatorio-financeiro-${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    toast.success("Relatório exportado");
+  }
 
   return (
     <AppShell>
@@ -251,16 +342,91 @@ function DashboardPage() {
             </div>
             <div className="flex items-center gap-2 md:ml-6 mt-4 md:mt-0"></div>
           </div>
-          <Button
-            asChild
-            size="lg"
-            className="rounded-full bg-primary text-primary-foreground hover:opacity-90"
-          >
-            <Link to="/transacoes/nova">
-              <Plus className="mr-1.5 h-4 w-4" /> Nova movimentação
-            </Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={openBudgetModal}
+              className="rounded-full border-border bg-card"
+            >
+              <PencilLine className="mr-1.5 h-4 w-4" /> Editar metas
+            </Button>
+            <Button variant="outline" onClick={exportCurrentReport} className="rounded-full border-border bg-card">
+              <Download className="mr-1.5 h-4 w-4" /> Exportar relatório
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              className="rounded-full bg-primary text-primary-foreground hover:opacity-90"
+            >
+              <Link to="/transacoes/nova">
+                <Plus className="mr-1.5 h-4 w-4" /> Nova movimentação
+              </Link>
+            </Button>
+          </div>
         </div>
+
+        <Dialog open={budgetModalOpen} onOpenChange={setBudgetModalOpen}>
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Configurar metas de orçamento</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-5 py-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Meta mensal total</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="50"
+                  value={budgetDraft.monthlyLimit}
+                  onChange={(event) =>
+                    setBudgetDraft((current) => ({
+                      ...current,
+                      monthlyLimit: Math.max(0, Number(event.target.value) || 0),
+                    }))
+                  }
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-ring"
+                />
+              </div>
+
+              <div className="space-y-3">
+                {Object.keys(budgetDraft.categoryLimits).map((category) => (
+                  <div key={category} className="space-y-2 rounded-2xl border border-border bg-muted/30 p-3">
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="font-medium text-foreground">{category}</span>
+                      <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                        {budgetDraft.categoryLimits[category] ? formatBRL(budgetDraft.categoryLimits[category]) : "Sem meta"}
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      step="50"
+                      value={budgetDraft.categoryLimits[category] ?? 0}
+                      onChange={(event) =>
+                        setBudgetDraft((current) => ({
+                          ...current,
+                          categoryLimits: {
+                            ...current.categoryLimits,
+                            [category]: Math.max(0, Number(event.target.value) || 0),
+                          },
+                        }))
+                      }
+                      className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm outline-none transition focus:border-ring"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setBudgetModalOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={saveBudgetModal} className="bg-primary text-primary-foreground">
+                Salvar metas
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -285,6 +451,155 @@ function DashboardPage() {
             tone="destructive"
             loading={loading}
           />
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-4">
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <Target className="h-4 w-4" /> Resumo de orçamento
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 p-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    Meta mensal
+                  </p>
+                  <p className="mt-1 text-2xl font-bold tabular">{formatBRL(budgetSummary.monthlyLimit)}</p>
+                </div>
+                <Badge
+                  variant={budgetSummary.remainingBudget >= 0 ? "secondary" : "destructive"}
+                  className="rounded-full"
+                >
+                  {budgetSummary.remainingBudget >= 0 ? "Dentro do limite" : "Acima do limite"}
+                </Badge>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Gasto acumulado</span>
+                  <span className="font-medium text-foreground">
+                    {formatBRL(budgetSummary.totalExpenses)}
+                  </span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={`h-full rounded-full ${
+                      budgetSummary.remainingBudget >= 0
+                        ? "bg-gradient-primary"
+                        : "bg-destructive"
+                    }`}
+                    style={{ width: `${Math.min(100, budgetSummary.spentPercentage)}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-border bg-muted/30 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Restante
+                  </p>
+                  <p className="mt-2 text-xl font-bold tabular">
+                    {formatBRL(budgetSummary.remainingBudget)}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-border bg-muted/30 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Uso do orçamento
+                  </p>
+                  <p className="mt-2 text-xl font-bold tabular">
+                    {Math.min(100, budgetSummary.spentPercentage).toFixed(0)}%
+                  </p>
+                </div>
+              </div>
+
+              {budgetSummary.overBudgetCategories.length > 0 ? (
+                <div className="space-y-2 rounded-2xl border border-destructive/30 bg-destructive/5 p-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-destructive">
+                    <AlertTriangle className="h-4 w-4" /> Categorias acima da meta
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {budgetSummary.overBudgetCategories.map((item) => (
+                      <Badge key={item.category} variant="destructive" className="rounded-full">
+                        {item.category}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 rounded-2xl border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  Nenhuma categoria excedeu a meta neste período.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <Target className="h-4 w-4" /> Meta por categoria
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <label className="block space-y-2">
+                <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  Meta mensal total
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="50"
+                  value={budgetConfig.monthlyLimit}
+                  onChange={(event) =>
+                    setBudgetConfig((current) => ({
+                      ...current,
+                      monthlyLimit: Math.max(0, Number(event.target.value) || 0),
+                    }))
+                  }
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none ring-0 transition focus:border-ring"
+                />
+              </label>
+
+              <div className="space-y-3">
+                {visibleCategoryBudgets.map((item) => (
+                  <div key={item.category} className="space-y-2 rounded-2xl border border-border bg-muted/30 p-3">
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="font-medium text-foreground">{item.category}</span>
+                      <span className="tabular text-muted-foreground">
+                        {formatBRL(item.spent)} / {formatBRL(item.limit || 0)}
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      step="50"
+                      value={budgetConfig.categoryLimits[item.category] ?? 0}
+                      onChange={(event) =>
+                        setBudgetConfig((current) => ({
+                          ...current,
+                          categoryLimits: {
+                            ...current.categoryLimits,
+                            [item.category]: Math.max(0, Number(event.target.value) || 0),
+                          },
+                        }))
+                      }
+                      className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm outline-none ring-0 transition focus:border-ring"
+                    />
+                    <div className="h-2 overflow-hidden rounded-full bg-background">
+                      <div
+                        className={`h-full rounded-full ${
+                          item.isOverBudget ? "bg-destructive" : "bg-primary"
+                        }`}
+                        style={{ width: `${Math.min(100, item.percentage)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Charts */}

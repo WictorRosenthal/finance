@@ -159,7 +159,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="leading-tight">
               <div className="font-display text-lg font-bold tracking-tight">
-                Finance<span className="text-primary">Flow</span>
+                MeuFinanceiro
               </div>
               <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 Controle financeiro
@@ -230,7 +230,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
 
       <footer className="mx-auto max-w-7xl px-4 py-8 text-center text-xs text-muted-foreground sm:px-6">
-        FinanceFlow · controle pessoal · {new Date().getFullYear()}
+        MeuFinanceiro · controle pessoal · {new Date().getFullYear()}
       </footer>
     </div>
   );

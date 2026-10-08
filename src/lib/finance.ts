@@ -66,6 +66,128 @@ export function todayISO(): string {
   return format(new Date(), "yyyy-MM-dd");
 }
 
+export type BudgetConfig = {
+  monthlyLimit: number;
+  categoryLimits: Record<string, number>;
+};
+
+export const BUDGET_STORAGE_KEY = "meuFinanceiro-budget-config";
+
+export function getDefaultBudgetConfig(): BudgetConfig {
+  return {
+    monthlyLimit: 4500,
+    categoryLimits: {
+      Casa: 1200,
+      Carro: 650,
+      Moto: 350,
+      Saúde: 500,
+      Esportes: 300,
+      Lazer: 450,
+      Alimentação: 800,
+      "Alimentação/Lazer": 250,
+      Outros: 400,
+    },
+  };
+}
+
+export function getBudgetConfig(): BudgetConfig {
+  if (typeof window === "undefined") {
+    return getDefaultBudgetConfig();
+  }
+
+  try {
+    const raw = window.localStorage.getItem(BUDGET_STORAGE_KEY);
+    const defaults = getDefaultBudgetConfig();
+
+    if (!raw) {
+      return defaults;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<BudgetConfig>;
+    return {
+      monthlyLimit: Number(parsed.monthlyLimit ?? defaults.monthlyLimit) || defaults.monthlyLimit,
+      categoryLimits: {
+        ...defaults.categoryLimits,
+        ...(parsed.categoryLimits ?? {}),
+      },
+    };
+  } catch {
+    return getDefaultBudgetConfig();
+  }
+}
+
+export function saveBudgetConfig(config: BudgetConfig) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(config));
+}
+
+export type BudgetSummaryItem = {
+  category: string;
+  spent: number;
+  limit: number;
+  remaining: number;
+  percentage: number;
+  isOverBudget: boolean;
+};
+
+export function calculateBudgetSummary(
+  monthTx: Array<{ type: "receita" | "despesa"; category: string; amount: number; final_amount?: number | null }>,
+  config: BudgetConfig,
+) {
+  const totalIncome = monthTx
+    .filter((t) => t.type === "receita")
+    .reduce((sum, t) => sum + Number(t.final_amount ?? t.amount ?? 0), 0);
+
+  const totalExpenses = monthTx
+    .filter((t) => t.type === "despesa")
+    .reduce((sum, t) => sum + Number(t.final_amount ?? t.amount ?? 0), 0);
+
+  const monthlyLimit = Number(config.monthlyLimit ?? 0);
+  const remainingBudget = monthlyLimit - totalExpenses;
+  const spentPercentage = monthlyLimit > 0 ? (totalExpenses / monthlyLimit) * 100 : 0;
+
+  const categoryMap = new Map<string, number>();
+  monthTx
+    .filter((t) => t.type === "despesa")
+    .forEach((t) => {
+      const category = t.category || "Outros";
+      categoryMap.set(category, (categoryMap.get(category) ?? 0) + Number(t.final_amount ?? t.amount ?? 0));
+    });
+
+  const categoryBreakdown: BudgetSummaryItem[] = Array.from(categoryMap.entries())
+    .map(([category, spent]) => {
+      const limit = Number(config.categoryLimits?.[category] ?? 0);
+      const remaining = limit - spent;
+      const percentage = limit > 0 ? Math.min((spent / limit) * 100, 1000) : 0;
+
+      return {
+        category,
+        spent,
+        limit,
+        remaining,
+        percentage,
+        isOverBudget: limit > 0 && spent > limit,
+      };
+    })
+    .sort((a, b) => b.spent - a.spent);
+
+  const overBudgetCategories = categoryBreakdown.filter((item) => item.isOverBudget);
+
+  return {
+    totalIncome,
+    totalExpenses,
+    balance: totalIncome - totalExpenses,
+    monthlyLimit,
+    remainingBudget,
+    spentPercentage,
+    categoryBreakdown,
+    overBudgetCategories,
+  };
+}
+
 /**
  * Calcula valor final aplicando desconto do convênio.
  */

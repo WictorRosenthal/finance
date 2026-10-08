@@ -37,14 +37,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FinanceFlow — Controle financeiro pessoal" },
+      { title: "MeuFinanceiro — Controle financeiro pessoal" },
       {
         name: "description",
         content: "Organize receitas, despesas, contas e convênios com clareza.",
       },
       { name: "theme-color", content: "#1f2024" },
-      { property: "og:title", content: "FinanceFlow — Controle financeiro pessoal" },
-      { name: "twitter:title", content: "FinanceFlow — Controle financeiro pessoal" },
+      { property: "og:title", content: "MeuFinanceiro — Controle financeiro pessoal" },
+      { name: "twitter:title", content: "MeuFinanceiro — Controle financeiro pessoal" },
       {
         property: "og:description",
         content: "Organize receitas, despesas, contas e convênios com clareza.",
